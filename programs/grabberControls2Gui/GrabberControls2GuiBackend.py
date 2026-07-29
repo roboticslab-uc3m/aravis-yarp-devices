@@ -2,7 +2,7 @@
 GrabberControls2Gui
 ---------------------
 
-Simple GUI for controlling GigE cameras using Aravis and YARP
+Simple GUI for controlling USB3/GigE cameras using Aravis and YARP
 
 Author: Álvaro Santos García
 Copyright: Universidad Carlos III de Madrid (C) 2025

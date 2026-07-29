@@ -1,5 +1,5 @@
-#ifndef __ARAVIS_GIGE_HPP__
-#define __ARAVIS_GIGE_HPP__
+#ifndef __ARAVIS_CAMERA_HPP__
+#define __ARAVIS_CAMERA_HPP__
 
 #include <map>
 
@@ -19,23 +19,23 @@ struct FeatureInfo
 
 /**
  * @ingroup YarpPlugins
- * @defgroup AravisGigE
- * @brief Contains AravisGigE.
+ * @defgroup AravisCamera
+ * @brief Contains AravisCamera.
  */
 
  /**
-  * @ingroup AravisGigE
-  * @brief Implementation for GigE cameras using Aravis as driver.
+  * @ingroup AravisCamera
+  * @brief Implementation for USB3/GigE cameras using Aravis as driver.
   */
-class AravisGigE : public yarp::dev::DeviceDriver,
+class AravisCamera : public yarp::dev::DeviceDriver,
 #ifdef HAVE_OPENCV
-                   public yarp::dev::IFrameGrabberImage,
+                     public yarp::dev::IFrameGrabberImage,
 #endif
-                   public yarp::dev::IFrameGrabberImageRaw,
-                   public yarp::dev::IFrameGrabberControls
+                     public yarp::dev::IFrameGrabberImageRaw,
+                     public yarp::dev::IFrameGrabberControls
 {
 public:
-    ~AravisGigE() override { close(); }
+    ~AravisCamera() override { close(); }
 
     //  --------- DeviceDriver Declarations. Implementation in DeviceDriverImpl.cpp ---------
     bool open(yarp::os::Searchable & config) override;
@@ -148,4 +148,4 @@ private:
     };
 };
 
-#endif // __ARAVIS_GIGE_HPP__
+#endif // __ARAVIS_CAMERA_HPP__

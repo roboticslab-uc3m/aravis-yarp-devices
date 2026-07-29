@@ -1,10 +1,10 @@
-#include "AravisGigE.hpp"
+#include "AravisCamera.hpp"
 
 #include <yarp/os/LogStream.h>
 
 #include "LogComponent.hpp"
 
-bool AravisGigE::getFeatureLimits(int feature, double * min, double * max)
+bool AravisCamera::getFeatureLimits(int feature, double * min, double * max)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -72,7 +72,7 @@ bool AravisGigE::getFeatureLimits(int feature, double * min, double * max)
     return false;
 }
 
-bool AravisGigE::checkEnabled(cameraFeature_id_t feature, bool * compatible)
+bool AravisCamera::checkEnabled(cameraFeature_id_t feature, bool * compatible)
 {
     if (!compatible)
     {
@@ -107,7 +107,7 @@ bool AravisGigE::checkEnabled(cameraFeature_id_t feature, bool * compatible)
     return true;
 }
 
-const FeatureInfo * AravisGigE::getFeatureInfo(cameraFeature_id_t feature)
+const FeatureInfo * AravisCamera::getFeatureInfo(cameraFeature_id_t feature)
 {
     if (yarp_arv_int_feature_map.count(feature))
     {
@@ -121,7 +121,7 @@ const FeatureInfo * AravisGigE::getFeatureInfo(cameraFeature_id_t feature)
     return nullptr;
 }
 
-void AravisGigE::printFeatureInfo(cameraFeature_id_t featureId, const FeatureInfo & info)
+void AravisCamera::printFeatureInfo(cameraFeature_id_t featureId, const FeatureInfo & info)
 {
     if (bool available = false; !hasFeature(featureId, &available) || !available)
     {
@@ -176,7 +176,7 @@ void AravisGigE::printFeatureInfo(cameraFeature_id_t featureId, const FeatureInf
     }
 }
 
-void AravisGigE::listAvailableFeatures()
+void AravisCamera::listAvailableFeatures()
 {
     yCInfo(ARV) << "Listing available features:";
 
@@ -191,7 +191,7 @@ void AravisGigE::listAvailableFeatures()
     }
 }
 
-bool AravisGigE::checkFeatureExistenceAndGetValue(const std::string & featureName, double & value)
+bool AravisCamera::checkFeatureExistenceAndGetValue(const std::string & featureName, double & value)
 {
     cameraFeature_id_t id = id_find(featureName);
 
@@ -204,7 +204,7 @@ bool AravisGigE::checkFeatureExistenceAndGetValue(const std::string & featureNam
     return getFeature(id, &value);
 }
 
-cameraFeature_id_t AravisGigE::id_find(const std::string & feature_name)
+cameraFeature_id_t AravisCamera::id_find(const std::string & feature_name)
 {
     for (const auto [id, info] : yarp_arv_int_feature_map)
     {

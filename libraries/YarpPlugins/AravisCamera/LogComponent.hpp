@@ -1,5 +1,5 @@
-#ifndef __ARAVIS_GIGE_LOG_COMPONENT_HPP__
-#define __ARAVIS_GIGE_LOG_COMPONENT_HPP__
+#ifndef __ARAVIS_CAMERA_LOG_COMPONENT_HPP__
+#define __ARAVIS_CAMERA_LOG_COMPONENT_HPP__
 
 #include <yarp/os/LogComponent.h>
 
@@ -11,4 +11,4 @@ void customLogCallback(yarp::os::Log::LogType type, const char * msg, const char
                        const char * func, double systemtime, double networktime, double externaltime,
                        const char * hostname, const char * process);
 
-#endif // __ARAVIS_GIGE_LOG_COMPONENT_HPP__
+#endif // __ARAVIS_CAMERA_LOG_COMPONENT_HPP__

@@ -1,5 +1,5 @@
-# AravisGigE device
-To use this YARP device a GigE camera is required. Once connected, use the following commands to control the camera and receive images.
+# AravisCamera device
+To use this YARP device a USB3/GigE camera is required. Once connected, use the following commands to control the camera and receive images.
 
 
 ## Requirements
@@ -9,15 +9,15 @@ Depends on:
 ## Launching the device
 To run the device and connect to the camera, simply run:
 
-`yarpdev --device AravisGigE`
+`yarpdev --device AravisCamera`
 
 If you want to test the device without an actual camera, you can use a fake Aravis camera:
 
-`yarpdev --device AravisGigE --fake`
+`yarpdev --device AravisCamera --fake`
 
 
 ## Obtaining a color image from the device
-This YARP device returns a raw 8-bit image from the camera, to obtain a color image from the image, the stream has to be connected using the [Bayer carrier ](http://www.yarp.it/carrier_config.html#carrier_config_bayer) to interpret the raw image as a RGB image. Given an `AravisGigE` device named `/grabber` and an input port named `/v` (from a viewer, for instance), the command to run to connect them is:
+This YARP device returns a raw 8-bit image from the camera, to obtain a color image from the image, the stream has to be connected using the [Bayer carrier ](http://www.yarp.it/carrier_config.html#carrier_config_bayer) to interpret the raw image as a RGB image. Given an `AravisCamera` device named `/grabber` and an input port named `/v` (from a viewer, for instance), the command to run to connect them is:
 
 `yarp connect /grabber /v udp+recv.bayer+order.gbrg`
 

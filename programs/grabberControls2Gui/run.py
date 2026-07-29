@@ -4,7 +4,7 @@
 GrabberControls2Gui
 ---------------------
 
-Simple GUI for controlling GigE cameras using Aravis and YARP
+Simple GUI for controlling USB3/GigE cameras using Aravis and YARP
 
 Author: Álvaro Santos García
 Copyright: Universidad Carlos III de Madrid (C) 2025
@@ -26,7 +26,7 @@ from .GrabberControls2GuiGUI import GrabberControls2GuiGUI
 
 @begin.start(auto_convert=True)
 @begin.logging
-def main(remote_port: 'Remote port running the AravisGigE grabber' = '/grabber'):
+def main(remote_port: 'Remote port running the AravisCamera grabber' = '/grabber'):
     # Configuración inicial
     yarp.Network.init()
 

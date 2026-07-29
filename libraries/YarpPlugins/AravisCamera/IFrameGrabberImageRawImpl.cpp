@@ -1,4 +1,4 @@
-#include "AravisGigE.hpp"
+#include "AravisCamera.hpp"
 
 #include <cstring> // std::memcpy
 
@@ -6,7 +6,7 @@
 
 #include "LogComponent.hpp"
 
-bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
+bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
 {
     //-- Right now it is implemented as polling (grab + retrieve image)
     //-- I think it could be also implemented with callbacks with ArvStreamCallback
@@ -82,12 +82,12 @@ bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
     return true;
 }
 
-int AravisGigE::height() const
+int AravisCamera::height() const
 {
     return _height;
 }
 
-int AravisGigE::width() const
+int AravisCamera::width() const
 {
     return _width;
 }

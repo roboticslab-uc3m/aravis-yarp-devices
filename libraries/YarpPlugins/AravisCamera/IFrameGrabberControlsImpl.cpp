@@ -1,4 +1,4 @@
-#include "AravisGigE.hpp"
+#include "AravisCamera.hpp"
 
 #include <iostream>
 
@@ -6,7 +6,7 @@
 
 #include "LogComponent.hpp"
 
-bool AravisGigE::getCameraDescription(CameraDescriptor * camera)
+bool AravisCamera::getCameraDescription(CameraDescriptor * camera)
 {
     if (arv_camera_is_uv_device(this->camera))
     {
@@ -22,7 +22,7 @@ bool AravisGigE::getCameraDescription(CameraDescriptor * camera)
     return true;
 }
 
-bool AravisGigE::hasFeature(int feature, bool * hasFeature)
+bool AravisCamera::hasFeature(int feature, bool * hasFeature)
 {
     yCDebug(ARV) << "Checking feature availability:" << feature;
 
@@ -68,7 +68,7 @@ bool AravisGigE::hasFeature(int feature, bool * hasFeature)
     return true;
 }
 
-bool AravisGigE::setFeature(int feature, double value)
+bool AravisCamera::setFeature(int feature, double value)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -155,7 +155,7 @@ bool AravisGigE::setFeature(int feature, double value)
     return true;
 }
 
-bool AravisGigE::getFeature(int feature, double * value)
+bool AravisCamera::getFeature(int feature, double * value)
 {
     yCDebug(ARV) << "Getting value for feature" << feature;
 
@@ -203,18 +203,18 @@ bool AravisGigE::getFeature(int feature, double * value)
     return true;
 }
 
-bool AravisGigE::setFeature(int feature, double value1, double value2)
+bool AravisCamera::setFeature(int feature, double value1, double value2)
 {
     yCError(ARV) << "No features with 2 values supported!";
     return false;
 }
 
-bool AravisGigE::getFeature(int feature, double * value1, double * value2)
+bool AravisCamera::getFeature(int feature, double * value1, double * value2)
 {
     return getFeatureLimits(feature, value1, value2);
 }
 
-bool AravisGigE::hasOnOff(int feature, bool * hasOnOff)
+bool AravisCamera::hasOnOff(int feature, bool * hasOnOff)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -229,7 +229,7 @@ bool AravisGigE::hasOnOff(int feature, bool * hasOnOff)
     return true;
 }
 
-bool AravisGigE::setActive(int feature, bool onoff)
+bool AravisCamera::setActive(int feature, bool onoff)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -262,7 +262,7 @@ bool AravisGigE::setActive(int feature, bool onoff)
     return true;
 }
 
-bool AravisGigE::getActive(int feature, bool * isActive)
+bool AravisCamera::getActive(int feature, bool * isActive)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -295,7 +295,7 @@ bool AravisGigE::getActive(int feature, bool * isActive)
     return true;
 }
 
-bool AravisGigE::hasAuto(int feature, bool * hasAuto)
+bool AravisCamera::hasAuto(int feature, bool * hasAuto)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo*  info = getFeatureInfo(f);
@@ -333,7 +333,7 @@ bool AravisGigE::hasAuto(int feature, bool * hasAuto)
     return true;
 }
 
-bool AravisGigE::hasManual(int feature, bool * hasManual)
+bool AravisCamera::hasManual(int feature, bool * hasManual)
 {
     // All numeric features support manual mode by default
     auto f = static_cast<cameraFeature_id_t>(feature);
@@ -341,7 +341,7 @@ bool AravisGigE::hasManual(int feature, bool * hasManual)
     return true;
 }
 
-bool AravisGigE::hasOnePush(int feature, bool * hasOnePush)
+bool AravisCamera::hasOnePush(int feature, bool * hasOnePush)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -356,7 +356,7 @@ bool AravisGigE::hasOnePush(int feature, bool * hasOnePush)
     return true;
 }
 
-bool AravisGigE::setMode(int feature, FeatureMode mode)
+bool AravisCamera::setMode(int feature, FeatureMode mode)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -401,7 +401,7 @@ bool AravisGigE::setMode(int feature, FeatureMode mode)
     return true;
 }
 
-bool AravisGigE::getMode(int feature, FeatureMode * mode)
+bool AravisCamera::getMode(int feature, FeatureMode * mode)
 {
     auto f = static_cast<cameraFeature_id_t>(feature);
     const FeatureInfo * info = getFeatureInfo(f);
@@ -463,7 +463,7 @@ bool AravisGigE::getMode(int feature, FeatureMode * mode)
     return true;
 }
 
-bool AravisGigE::setOnePush(int feature)
+bool AravisCamera::setOnePush(int feature)
 {
     if (!setMode(feature, MODE_AUTO))
     {

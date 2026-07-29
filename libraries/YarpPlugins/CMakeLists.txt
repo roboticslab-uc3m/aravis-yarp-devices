@@ -9,4 +9,4 @@ option(ALLOW_DEVICE_PARAM_PARSER_GENERATION "Allow YARP to (re)build device para
        ${ALLOW_DEVICE_PARAM_PARSER_GENERATION_DEFAULT_VALUE})
 
 # YARP devices.
-add_subdirectory(AravisGigE)
+add_subdirectory(AravisCamera)

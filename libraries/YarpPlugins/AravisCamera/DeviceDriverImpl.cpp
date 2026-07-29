@@ -1,4 +1,4 @@
-#include "AravisGigE.hpp"
+#include "AravisCamera.hpp"
 
 #include <string>
 #include <thread>
@@ -8,7 +8,7 @@
 
 #include "LogComponent.hpp"
 
-bool AravisGigE::open(yarp::os::Searchable &config)
+bool AravisCamera::open(yarp::os::Searchable &config)
 {
     if (config.check("fake", "enable fake Aravis camera"))
     {
@@ -197,14 +197,14 @@ bool AravisGigE::open(yarp::os::Searchable &config)
         yCInfo(ARV) << "Entering interactive mode...";
         useLogFile = true;
         yarp::os::Log::setPrintCallback(customLogCallback);
-        std::thread t(&AravisGigE::runInteractiveTerminal, this);
+        std::thread t(&AravisCamera::runInteractiveTerminal, this);
         t.detach();
     }
 
     return true;
 }
 
-bool AravisGigE::close()
+bool AravisCamera::close()
 {
     if (camera == nullptr)
     {

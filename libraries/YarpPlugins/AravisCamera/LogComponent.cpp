@@ -25,4 +25,4 @@ void customLogCallback(yarp::os::Log::LogType type, const char * msg, const char
     }
 }
 
-YARP_LOG_COMPONENT(ARV, "rl.AravisGigE")
+YARP_LOG_COMPONENT(ARV, "rl.AravisCamera")

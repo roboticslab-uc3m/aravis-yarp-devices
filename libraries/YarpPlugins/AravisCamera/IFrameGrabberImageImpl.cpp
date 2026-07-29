@@ -1,4 +1,4 @@
-#include "AravisGigE.hpp"
+#include "AravisCamera.hpp"
 
 #include <cstring> // std::memcpy
 
@@ -8,7 +8,7 @@
 
 #include "LogComponent.hpp"
 
-bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
+bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
 {
     if (!stream)
     {

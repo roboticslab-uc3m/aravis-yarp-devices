@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>AravisGigEControllerGUI</class>
- <widget class="QWidget" name="AravisGigEControllerGUI">
+ <class>AravisCameraControllerGUI</class>
+ <widget class="QWidget" name="AravisCameraControllerGUI">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>AravisGigEControllerGUI</string>
+   <string>AravisCameraControllerGUI</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_20" stretch="1,2">
    <item>

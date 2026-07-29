@@ -1,4 +1,4 @@
-#include "AravisGigE.hpp"
+#include "AravisCamera.hpp"
 
 #include <cstdlib> // std::exit
 
@@ -24,7 +24,7 @@ namespace
     }
 }
 
-void AravisGigE::runInteractiveTerminal()
+void AravisCamera::runInteractiveTerminal()
 {
     std::string command;
 
