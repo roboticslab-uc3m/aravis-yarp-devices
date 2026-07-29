@@ -1,20 +1,12 @@
-/*
- * AravisGigE
- * ---------------------
- *
- * Middleware for industrial camera integration in YARP using the Aravis library.
- *
- * Author: Álvaro Santos García
- * Copyright: Universidad Carlos III de Madrid (C) 2025
- * CopyPolicy: Released under the terms of the GNU LGPL v2.1
- */
+#include "AravisGigE.hpp"
+
+#include <cstring> // std::memcpy
 
 #include <yarp/os/LogStream.h>
 
-#include "AravisGigE.hpp"
 #include "LogComponent.hpp"
 
-bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> &image)
+bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
 {
     //-- Right now it is implemented as polling (grab + retrieve image)
     //-- I think it could be also implemented with callbacks with ArvStreamCallback
@@ -33,15 +25,21 @@ bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> &image)
     int max_tries = 10;
     int tries = 0;
     int success = false;
+
     while (!success && tries < max_tries)
     {
         arvBuffer = arv_stream_timeout_pop_buffer(stream, 200000);
+
         if (arvBuffer != nullptr && arv_buffer_get_status(arvBuffer) != ARV_BUFFER_STATUS_SUCCESS)
         {
             arv_stream_push_buffer(stream, arvBuffer);
         }
         else
+        {
             success = true;
+        }
+
+        tries++;
     }
 
     if (arvBuffer != nullptr && success)
@@ -60,10 +58,11 @@ bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> &image)
 
     //-- Retrieve frame (convert and send as yarp image)
     //--------------------------------------------------------------------------------
-    if (framebuffer!=nullptr)
+    if (framebuffer != nullptr)
     {
         //-- Create a yarp image container according with the current pixel format
         yarp::sig::Image raw_image;
+
         if (pixelFormat != ARV_PIXEL_FORMAT_MONO_8 && pixelFormat != ARV_PIXEL_FORMAT_BAYER_RG_8)
         {
             yCError(ARV) << "Unsupported pixel format";
@@ -72,7 +71,7 @@ bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> &image)
         //-- Write data
         image.zero();
         image.resize(_width, _height);
-        mempcpy(image.getRawImage(), framebuffer, _width*_height*image.getPixelSize());
+        std::memcpy(image.getRawImage(), framebuffer, _width * _height * image.getPixelSize());
     }
     else
     {

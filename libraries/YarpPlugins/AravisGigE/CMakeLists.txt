@@ -17,6 +17,7 @@ if(NOT SKIP_AravisGigE)
     yarp_add_plugin(AravisGigE)
 
     target_sources(AravisGigE PRIVATE AravisGigE.hpp
+                                      AravisGigE.cpp
                                       DeviceDriverImpl.cpp
                                       IFrameGrabberControlsImpl.cpp
                                       IFrameGrabberImageRawImpl.cpp

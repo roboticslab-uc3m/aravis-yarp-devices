@@ -1,22 +1,15 @@
-/*
- * AravisGigE
- * ---------------------
- *
- * Middleware for industrial camera integration in YARP using the Aravis library.
- *
- * Author: Álvaro Santos García
- * Copyright: Universidad Carlos III de Madrid (C) 2025
- * CopyPolicy: Released under the terms of the GNU LGPL v2.1
- */
+#include "AravisGigE.hpp"
+
+#include <cstring> // std::memcpy
+
+#include <opencv2/imgproc.hpp>
 
 #include <yarp/os/LogStream.h>
-#include <opencv2/imgproc.hpp>
 #include <yarp/cv/Cv.h>
 
-#include "AravisGigE.hpp"
 #include "LogComponent.hpp"
 
-bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> &image)
+bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
 {
     if (!stream)
     {
@@ -24,7 +17,7 @@ bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> &image)
         return false;
     }
 
-    ArvBuffer *arvBuffer = nullptr;
+    ArvBuffer * arvBuffer = nullptr;
     int max_tries = 10;
     int tries = 0;
     bool success = false;
@@ -32,6 +25,7 @@ bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> &image)
     while (!success && tries < max_tries)
     {
         arvBuffer = arv_stream_timeout_pop_buffer(stream, 200000);
+
         if (arvBuffer && arv_buffer_get_status(arvBuffer) == ARV_BUFFER_STATUS_SUCCESS)
         {
             success = true;
@@ -40,6 +34,7 @@ bool AravisGigE::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> &image)
         {
             arv_stream_push_buffer(stream, arvBuffer);
         }
+
         tries++;
     }
 

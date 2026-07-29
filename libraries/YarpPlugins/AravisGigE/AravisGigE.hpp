@@ -1,29 +1,19 @@
-/*
- * AravisGigE
- * ---------------------
- *
- * Middleware for industrial camera integration in YARP using the Aravis library.
- *
- * Author: Álvaro Santos García
- * Copyright: Universidad Carlos III de Madrid (C) 2025
- * CopyPolicy: Released under the terms of the GNU LGPL v2.1
- */
-
 #ifndef __ARAVIS_GIGE_HPP__
 #define __ARAVIS_GIGE_HPP__
 
 #include <map>
-#include <thread>
 
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/dev/IFrameGrabberControls.h>
 #include <yarp/dev/IFrameGrabberImage.h>
+
 #include <arv.h>
 
-struct FeatureInfo {
-    const char* featureName;
-    const char* enabledName;
-    const char* autoName;
+struct FeatureInfo
+{
+    const char * featureName;
+    const char * enabledName;
+    const char * autoName;
     bool supportsOnePush;
 };
 
@@ -38,9 +28,9 @@ struct FeatureInfo {
   * @brief Implementation for GigE cameras using Aravis as driver.
   */
 class AravisGigE : public yarp::dev::DeviceDriver,
+                   public yarp::dev::IFrameGrabberImage,
                    public yarp::dev::IFrameGrabberImageRaw,
-                   public yarp::dev::IFrameGrabberControls,
-                   public yarp::dev::IFrameGrabberImage
+                   public yarp::dev::IFrameGrabberControls
 {
 public:
 
@@ -50,14 +40,14 @@ public:
     bool open(yarp::os::Searchable & config) override;
     bool close() override;
 
-    //  --------- IFrameGrabberImageRaw Declarations. Implementation in IFrameGrabberImageRawImpl.cpp ---------
+    //  --------- IFrameGrabberImageOf<> Declarations. Implementation in IFrameGrabberImage(Raw)Impl.cpp ---------
     bool getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image) override;
-    bool getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> &image) override;
+    bool getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image) override;
     int height() const override;
     int width() const override;
 
     // ---------- Terminal ----------------------
-    void runInteractiveTerminal();
+
 
     // ---------- IFrameGrabberControls Declarations. Implementation in IFrameGrabberControlsImpl.cpp ---------
     bool getCameraDescription(CameraDescriptor * camera) override;
@@ -75,16 +65,17 @@ public:
     bool setMode(int feature, FeatureMode mode) override;
     bool getMode(int feature, FeatureMode * mode) override;
     bool setOnePush(int feature) override;
-    bool getFeatureLimits(int feature, double *min, double *max);
-    bool checkEnabled(cameraFeature_id_t feature, bool* compatible);
-    const FeatureInfo* getFeatureInfo(cameraFeature_id_t feature);
-    void printFeatureInfo(cameraFeature_id_t featureId, const FeatureInfo& info);
-
-    void listAvailableFeatures();
-    bool checkFeatureExistenceAndGetValue(const std::string &featureName, double &value);
-    cameraFeature_id_t id_find(const std::string &feature_name);
 
 private:
+    void runInteractiveTerminal();
+    bool getFeatureLimits(int feature, double * min, double * max);
+    bool checkEnabled(cameraFeature_id_t feature, bool * compatible);
+    const FeatureInfo * getFeatureInfo(cameraFeature_id_t feature);
+    void printFeatureInfo(cameraFeature_id_t featureId, const FeatureInfo & info);
+    void listAvailableFeatures();
+    bool checkFeatureExistenceAndGetValue(const std::string & featureName, double & value);
+    cameraFeature_id_t id_find(const std::string & feature_name);
+
     ArvCamera       * camera {nullptr};      // camera to control
     ArvStream       * stream {nullptr};      // object for video stream reception
     void            * framebuffer {nullptr}; //
@@ -142,7 +133,7 @@ private:
         {YARP_FEATURE_MIRROR, {"Mirror", "MirrorEnabled", "MirrorAuto", false}}
     };
 
-    const std::map<cameraFeature_id_t, FeatureInfo> yarp_arv_float_feat_map = {
+    const std::map<cameraFeature_id_t, FeatureInfo> yarp_arv_float_feature_map = {
         {YARP_FEATURE_EXPOSURE, {"ExposureTime", "ExposureEnabled", "ExposureAuto", true}},
         {YARP_FEATURE_TRIGGER_DELAY, {"TriggerDelay", "TriggerDelayEnabled", "TriggerDelayAuto", false}},
         {YARP_FEATURE_GAIN, {"Gain", "GainEnabled", "GainAuto", true}},
@@ -152,7 +143,6 @@ private:
         {YARP_FEATURE_SATURATION, {"Saturation", "SaturationEnabled", "SaturationAuto", false}},
         {YARP_FEATURE_GAMMA, {"Gamma", "GammaEnabled", "GammaAuto", false}}
     };
-
 };
 
 #endif // __ARAVIS_GIGE_HPP__
