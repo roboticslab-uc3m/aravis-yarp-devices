@@ -32,3 +32,5 @@ Installation instructions for installing from source can be found [here](doc/ara
 ## Similar and Related Projects
 
 - [roboticslab-uc3m/yarp-devices](https://github.com/roboticslab-uc3m/yarp-devices)
+  - [issue #125](https://github.com/roboticslab-uc3m/yarp-devices/issues/125)
+  - [issue #145](https://github.com/roboticslab-uc3m/yarp-devices/issues/145)
