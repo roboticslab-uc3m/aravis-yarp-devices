@@ -54,7 +54,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
 include(CMakeDependentOption)
 
 # Acknowledge this is a CTest-friendly project.
-enable_testing()
+# enable_testing()
 
 # Add main contents.
 add_subdirectory(libraries)
@@ -73,6 +73,7 @@ include(InstallBasicPackageFiles)
 install_basic_package_files(ARAVIS_YARP_DEVICES
                             VERSION 0.1.0
                             COMPATIBILITY AnyNewerVersion
+                            NO_EXPORT
                             NO_SET_AND_CHECK_MACRO
                             NO_CHECK_REQUIRED_COMPONENTS_MACRO
                             NAMESPACE ROBOTICSLAB::)
