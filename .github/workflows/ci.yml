@@ -12,7 +12,7 @@ env:
   CMAKE_C_COMPILER_LAUNCHER: ccache
   CMAKE_CXX_COMPILER_LAUNCHER: ccache
   CMAKE_BUILD_TYPE: Debug
-  ARAVIS_VER: ARAVIS_0_6_4
+  ARAVIS_VER: 0.8.36
 
 jobs:
   maybe_skip:
@@ -70,10 +70,11 @@ jobs:
       uses: actions/checkout@v7
       with:
         repository: AravisProject/aravis
+        ref: ${{env.ARAVIS_VER}}
         path: .deps/aravis
 
     - name: Install dependencies via apt
-      run: sudo apt-get update && sudo apt-get install -qq ccache intltool gtk-doc-tools libxml2-dev libglib2.0-dev
+      run: sudo apt-get update && sudo apt-get install -qq ccache intltool gtk-doc-tools libxml2-dev libglib2.0-dev libopencv-dev
 
     - name: Set up CMake
       uses: jwlawson/actions-setup-cmake@v2

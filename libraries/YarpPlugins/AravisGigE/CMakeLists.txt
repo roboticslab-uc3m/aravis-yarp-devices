@@ -2,6 +2,8 @@ if(NOT ARAVIS_FOUND AND (NOT DEFINED ENABLE_AravisGigE OR ENABLE_AravisGigE))
     message(WARNING "ARAVIS package not found, disabling AravisGigE")
 endif()
 
+find_package(OpenCV REQUIRED)
+
 yarp_prepare_plugin(AravisGigE
                     CATEGORY device
                     TYPE AravisGigE
@@ -20,12 +22,15 @@ if(NOT SKIP_AravisGigE)
                                       DeviceDriverImpl.cpp
                                       IFrameGrabberControlsImpl.cpp
                                       IFrameGrabberImageRawImpl.cpp
+                                      IFrameGrabberImageImpl.cpp
                                       LogComponent.hpp
-                                      LogComponent.cpp)
+                                      LogComponent.cpp
+                                      TerminalComponent.cpp)
 
     target_link_libraries(AravisGigE YARP::YARP_os
                                      YARP::YARP_dev
-                                     ${ARAVIS_LIBRARIES})
+                                     ${ARAVIS_LIBRARIES}
+                                     ${OpenCV_LIBS})
 
     target_include_directories(AravisGigE PRIVATE ${ARAVIS_INCLUDE_DIRS})
 

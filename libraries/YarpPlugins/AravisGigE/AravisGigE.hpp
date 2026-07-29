@@ -1,14 +1,31 @@
+/*
+ * AravisGigE
+ * ---------------------
+ *
+ * Middleware for industrial camera integration in YARP using the Aravis library.
+ *
+ * Author: Álvaro Santos García
+ * Copyright: Universidad Carlos III de Madrid (C) 2025
+ * CopyPolicy: Released under the terms of the GNU LGPL v2.1
+ */
+
 #ifndef __ARAVIS_GIGE_HPP__
 #define __ARAVIS_GIGE_HPP__
 
 #include <map>
+#include <thread>
 
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/dev/IFrameGrabberControls.h>
 #include <yarp/dev/IFrameGrabberImage.h>
-
 #include <arv.h>
 
+struct FeatureInfo {
+    const char* featureName;
+    const char* enabledName;
+    const char* autoName;
+    bool supportsOnePush;
+};
 
 /**
  * @ingroup YarpPlugins
@@ -22,9 +39,12 @@
   */
 class AravisGigE : public yarp::dev::DeviceDriver,
                    public yarp::dev::IFrameGrabberImageRaw,
-                   public yarp::dev::IFrameGrabberControls
+                   public yarp::dev::IFrameGrabberControls,
+                   public yarp::dev::IFrameGrabberImage
 {
 public:
+
+    ~AravisGigE() override { close(); }
 
     //  --------- DeviceDriver Declarations. Implementation in DeviceDriverImpl.cpp ---------
     bool open(yarp::os::Searchable & config) override;
@@ -32,8 +52,12 @@ public:
 
     //  --------- IFrameGrabberImageRaw Declarations. Implementation in IFrameGrabberImageRawImpl.cpp ---------
     bool getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image) override;
+    bool getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> &image) override;
     int height() const override;
     int width() const override;
+
+    // ---------- Terminal ----------------------
+    void runInteractiveTerminal();
 
     // ---------- IFrameGrabberControls Declarations. Implementation in IFrameGrabberControlsImpl.cpp ---------
     bool getCameraDescription(CameraDescriptor * camera) override;
@@ -51,6 +75,14 @@ public:
     bool setMode(int feature, FeatureMode mode) override;
     bool getMode(int feature, FeatureMode * mode) override;
     bool setOnePush(int feature) override;
+    bool getFeatureLimits(int feature, double *min, double *max);
+    bool checkEnabled(cameraFeature_id_t feature, bool* compatible);
+    const FeatureInfo* getFeatureInfo(cameraFeature_id_t feature);
+    void printFeatureInfo(cameraFeature_id_t featureId, const FeatureInfo& info);
+
+    void listAvailableFeatures();
+    bool checkFeatureExistenceAndGetValue(const std::string &featureName, double &value);
+    cameraFeature_id_t id_find(const std::string &feature_name);
 
 private:
     ArvCamera       * camera {nullptr};      // camera to control
@@ -91,16 +123,36 @@ private:
     unsigned        frameID {0};            // current frame id
     unsigned        prevFrameID {0};
 
-    std::map<cameraFeature_id_t, const char *> yarp_arv_int_feature_map {
-        {YARP_FEATURE_ZOOM, "Zoom"},
-        {YARP_FEATURE_FOCUS, "Focus"},
+    // Feature map with all the metadata
+    const std::map<cameraFeature_id_t, FeatureInfo> yarp_arv_int_feature_map = {
+        {YARP_FEATURE_BRIGHTNESS, {"Brightness", "BrightnessEnabled", "BrightnessAuto", false}},
+        {YARP_FEATURE_SHUTTER, {"Shutter", "ShutterEnabled", "ShutterAuto", true}},
+        {YARP_FEATURE_IRIS, {"Iris", "IrisEnabled", "IrisAuto", false}},
+        {YARP_FEATURE_FOCUS, {"Focus", "FocusEnabled", "FocusAuto", true}},
+        {YARP_FEATURE_TEMPERATURE, {"Temperature", "TemperatureEnabled", nullptr, false}},
+        {YARP_FEATURE_TRIGGER, {"Trigger", "TriggerEnabled", "TriggerAuto", false}},
+        {YARP_FEATURE_WHITE_SHADING, {"WhiteShading", "WhiteShadingEnabled", nullptr, false}},
+        {YARP_FEATURE_ZOOM, {"Zoom", "ZoomEnabled", "ZoomAuto", false}},
+        {YARP_FEATURE_PAN, {"Pan", "PanEnabled", "PanAuto", false}},
+        {YARP_FEATURE_TILT, {"Tilt", "TiltEnabled", "TiltAuto", false}},
+        {YARP_FEATURE_SHARPNESS, {"Sharpness", "SharpnessEnabled", "SharpnessAuto", false}},
+        {YARP_FEATURE_OPTICAL_FILTER, {"OpticalFilter", "OpticalFilterEnabled", "OpticalFilter", false}},
+        {YARP_FEATURE_CAPTURE_SIZE, {"CaptureSize", "CaptureSizeEnabled", "CaptureSizeAuto", false}},
+        {YARP_FEATURE_CAPTURE_QUALITY, {"CaptureQuality", "CaptureQualityEnabled", "CaptureQualityAuto", false}},
+        {YARP_FEATURE_MIRROR, {"Mirror", "MirrorEnabled", "MirrorAuto", false}}
     };
 
-    std::map<cameraFeature_id_t, const char *> yarp_arv_float_feat_map {
-        {YARP_FEATURE_EXPOSURE, "ExposureTime"},
-        {YARP_FEATURE_GAIN, "Gain"},
-        {YARP_FEATURE_FRAME_RATE, "FPS"}
+    const std::map<cameraFeature_id_t, FeatureInfo> yarp_arv_float_feat_map = {
+        {YARP_FEATURE_EXPOSURE, {"ExposureTime", "ExposureEnabled", "ExposureAuto", true}},
+        {YARP_FEATURE_TRIGGER_DELAY, {"TriggerDelay", "TriggerDelayEnabled", "TriggerDelayAuto", false}},
+        {YARP_FEATURE_GAIN, {"Gain", "GainEnabled", "GainAuto", true}},
+        {YARP_FEATURE_FRAME_RATE, {"AcquisitionFrameRate", "AcquisitionFrameRateEnabled", "AcquisitionFrameRateAuto", false}},
+        {YARP_FEATURE_WHITE_BALANCE, {"BalanceWhite", "BalanceWhiteEnabled", "BalanceWhiteAuto", true}},
+        {YARP_FEATURE_HUE, {"Hue", "HueEnabled", "HueAuto", false}},
+        {YARP_FEATURE_SATURATION, {"Saturation", "SaturationEnabled", "SaturationAuto", false}},
+        {YARP_FEATURE_GAMMA, {"Gamma", "GammaEnabled", "GammaAuto", false}}
     };
+
 };
 
 #endif // __ARAVIS_GIGE_HPP__

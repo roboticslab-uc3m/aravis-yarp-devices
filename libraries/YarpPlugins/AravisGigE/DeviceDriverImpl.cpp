@@ -1,14 +1,27 @@
-#include "AravisGigE.hpp"
+/*
+ * AravisGigE
+ * ---------------------
+ *
+ * Middleware for industrial camera integration in YARP using the Aravis library.
+ *
+ * Author: Álvaro Santos García
+ * Copyright: Universidad Carlos III de Madrid (C) 2025
+ * CopyPolicy: Released under the terms of the GNU LGPL v2.1
+ */
 
 #include <string>
 #include <unordered_set>
-
 #include <yarp/os/LogStream.h>
+#include <yarp/os/Log.h>
 
+#include "AravisGigE.hpp"
 #include "LogComponent.hpp"
+
+//AravisQtWindow *qtWindow = nullptr;
 
 bool AravisGigE::open(yarp::os::Searchable &config)
 {
+
     //-- Configuration of Aravis GigE Camera device
     if (config.check("fake", "enable fake Aravis camera"))
     {
@@ -18,7 +31,7 @@ bool AravisGigE::open(yarp::os::Searchable &config)
 
     //-- Open Aravis device(s)
     //-------------------------------------------------------------------------------
-    int index = config.check("index", yarp::os::Value(0), "camera index").asInt32();
+    int index = config.check("index", yarp::os::Value(0), "camera treindex").asInt32();
 
     arv_update_device_list();
 
@@ -61,24 +74,39 @@ bool AravisGigE::open(yarp::os::Searchable &config)
             availablePixelFormats.emplace(availableFormatsStrings[i]);
         }
 
+        // formats in availablePixelFormats
+        yCInfo(ARV) << "Stored pixel formats in availablePixelFormats:";
+        for (const auto& format : availablePixelFormats) {
+            yCInfo(ARV) << format;
+        }
+
         g_free(availableFormatsStrings);
         g_free(availableFormatsNames);
     }
 
+    // ===================== Pruebas sobre pixel format ======================
     if (config.check("pixelFormat", "pixel format"))
     {
         //-- Set pixel format
-        auto requestedPixelFormatString = config.find("pixelFormat").asString();
+        std::string requestedPixelFormatString = config.find("pixelFormat").asString();
 
         if (availablePixelFormats.find(requestedPixelFormatString) == availablePixelFormats.end())
         {
-            yCError(ARV) << "Requested pixel format" << requestedPixelFormatString << "is not available";
+            yCError(ARV) << "Requested pixel format" << requestedPixelFormatString << " is not available";
             return false;
         }
 
-        yCInfo(ARV) << "Setting pixel format to" << requestedPixelFormatString;
+        yCInfo(ARV) << "Setting pixel format to " << requestedPixelFormatString;
 
         arv_camera_set_pixel_format_from_string(camera, requestedPixelFormatString.c_str(), nullptr);
+
+        const char *appliedPixelFormatString = arv_camera_get_pixel_format_as_string(camera, nullptr);
+        if (!appliedPixelFormatString || requestedPixelFormatString != appliedPixelFormatString)
+        {
+            yCError(ARV) << "Pixel format change failed! Expected: " << requestedPixelFormatString
+                        << ", but got: " << (appliedPixelFormatString ? appliedPixelFormatString : "NULL");
+            return false;
+        }
     }
     else
     {
@@ -197,6 +225,16 @@ bool AravisGigE::open(yarp::os::Searchable &config)
     arv_camera_start_acquisition(camera, nullptr);
 
     yCInfo(ARV) << "Aravis Camera acquisition started!";
+
+    // Controls terminal
+    if (config.check("terminal", "enable interactive terminal")) {
+        yCInfo(ARV) << "Entering interactive mode...";
+        useLogFile = true;
+        yarp::os::Log::setPrintCallback(customLogCallback);
+        std::thread t(&AravisGigE::runInteractiveTerminal, this);
+        t.detach();
+    }
+
     return true;
 }
 
