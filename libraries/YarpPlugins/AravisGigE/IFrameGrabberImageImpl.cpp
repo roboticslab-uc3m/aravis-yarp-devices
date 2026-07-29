@@ -5,7 +5,6 @@
 #include <opencv2/imgproc.hpp>
 
 #include <yarp/os/LogStream.h>
-#include <yarp/cv/Cv.h>
 
 #include "LogComponent.hpp"
 

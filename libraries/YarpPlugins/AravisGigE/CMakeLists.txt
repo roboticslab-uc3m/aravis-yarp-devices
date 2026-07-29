@@ -2,8 +2,6 @@ if(NOT Aravis_FOUND AND (NOT DEFINED ENABLE_AravisGigE OR ENABLE_AravisGigE))
     message(WARNING "Aravis package not found, disabling AravisGigE")
 endif()
 
-find_package(OpenCV REQUIRED imgproc)
-
 yarp_prepare_plugin(AravisGigE
                     CATEGORY device
                     TYPE AravisGigE
@@ -21,15 +19,22 @@ if(NOT SKIP_AravisGigE)
                                       DeviceDriverImpl.cpp
                                       IFrameGrabberControlsImpl.cpp
                                       IFrameGrabberImageRawImpl.cpp
-                                      IFrameGrabberImageImpl.cpp
                                       LogComponent.hpp
                                       LogComponent.cpp
                                       TerminalComponent.cpp)
 
     target_link_libraries(AravisGigE YARP::YARP_os
                                      YARP::YARP_dev
-                                     PkgConfig::Aravis
-                                     opencv_imgproc)
+                                     PkgConfig::Aravis)
+
+    if(TARGET opencv_imgproc)
+        message(STATUS "OpenCV imgproc module found, enabling color support in AravisGigE")
+        target_link_libraries(AravisGigE opencv_imgproc)
+        target_compile_definitions(AravisGigE PRIVATE HAVE_OPENCV)
+        target_sources(AravisGigE PRIVATE IFrameGrabberImageImpl.cpp)
+    else()
+        message(STATUS "OpenCV imgproc module not found, disabling color support in AravisGigE")
+    endif()
 
     yarp_install(TARGETS AravisGigE
                  LIBRARY DESTINATION ${ARAVIS-YARP-DEVICES_DYNAMIC_PLUGINS_INSTALL_DIR}

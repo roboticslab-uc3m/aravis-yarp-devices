@@ -28,12 +28,13 @@ struct FeatureInfo
   * @brief Implementation for GigE cameras using Aravis as driver.
   */
 class AravisGigE : public yarp::dev::DeviceDriver,
+#ifdef HAVE_OPENCV
                    public yarp::dev::IFrameGrabberImage,
+#endif
                    public yarp::dev::IFrameGrabberImageRaw,
                    public yarp::dev::IFrameGrabberControls
 {
 public:
-
     ~AravisGigE() override { close(); }
 
     //  --------- DeviceDriver Declarations. Implementation in DeviceDriverImpl.cpp ---------
@@ -42,7 +43,9 @@ public:
 
     //  --------- IFrameGrabberImageOf<> Declarations. Implementation in IFrameGrabberImage(Raw)Impl.cpp ---------
     bool getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image) override;
+#ifdef HAVE_OPENCV
     bool getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image) override;
+#endif
     int height() const override;
     int width() const override;
 
