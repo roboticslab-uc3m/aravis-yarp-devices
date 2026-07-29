@@ -23,17 +23,15 @@ if(NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 
 # Pick up our CMake modules.
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake
-                              ${CMAKE_SOURCE_DIR}/cmake/find-modules)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/find-modules)
 
 # Hard dependencies.
 find_package(YCM 0.11 REQUIRED)
 find_package(YARP 3.11 REQUIRED COMPONENTS os dev)
 
 # Soft dependencies.
-find_package(ARAVIS 0.8 QUIET)
+find_package(Aravis 0.8.30 QUIET)
 find_package(Doxygen QUIET)
-find_package(GTestSources 1.8 QUIET)
 find_package(Python QUIET)
 
 # Always build YARP devices as MODULE libraries.

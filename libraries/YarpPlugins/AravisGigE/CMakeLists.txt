@@ -1,20 +1,18 @@
-if(NOT ARAVIS_FOUND AND (NOT DEFINED ENABLE_AravisGigE OR ENABLE_AravisGigE))
-    message(WARNING "ARAVIS package not found, disabling AravisGigE")
+if(NOT Aravis_FOUND AND (NOT DEFINED ENABLE_AravisGigE OR ENABLE_AravisGigE))
+    message(WARNING "Aravis package not found, disabling AravisGigE")
 endif()
 
-find_package(OpenCV REQUIRED)
+find_package(OpenCV REQUIRED imgproc)
 
 yarp_prepare_plugin(AravisGigE
                     CATEGORY device
                     TYPE AravisGigE
                     INCLUDE AravisGigE.hpp
                     DEFAULT ON
-                    DEPENDS ARAVIS_FOUND
+                    DEPENDS Aravis_FOUND
                     EXTRA_CONFIG WRAPPER=frameGrabber_nws_yarp)
 
 if(NOT SKIP_AravisGigE)
-
-    link_directories(${ARAVIS_LIBRARY_DIRS})
 
     yarp_add_plugin(AravisGigE)
 
@@ -29,10 +27,8 @@ if(NOT SKIP_AravisGigE)
 
     target_link_libraries(AravisGigE YARP::YARP_os
                                      YARP::YARP_dev
-                                     ${ARAVIS_LIBRARIES}
-                                     ${OpenCV_LIBS})
-
-    target_include_directories(AravisGigE PRIVATE ${ARAVIS_INCLUDE_DIRS})
+                                     PkgConfig::Aravis
+                                     opencv_imgproc)
 
     yarp_install(TARGETS AravisGigE
                  LIBRARY DESTINATION ${ARAVIS-YARP-DEVICES_DYNAMIC_PLUGINS_INSTALL_DIR}
