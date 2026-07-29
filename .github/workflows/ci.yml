@@ -70,7 +70,7 @@ jobs:
       run: wget -O- -q https://github.com/AravisProject/aravis/archive/refs/tags/$ARAVIS_VER.tar.gz | tar -C .deps -xzf -
 
     - name: Install dependencies via apt
-      run: sudo apt-get update && sudo apt-get install -qq ccache
+      run: sudo apt-get update && sudo apt-get install -qq ccache intltool gtk-doc-tools libxml2-dev libglib2.0-dev
 
     - name: Set up CMake
       uses: jwlawson/actions-setup-cmake@v2
