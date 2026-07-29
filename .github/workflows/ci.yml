@@ -66,8 +66,11 @@ jobs:
         ref: ${{matrix.robotology.yarp}}
         path: .deps/yarp
 
-    - name: Download ARAVIS
-      run: wget -O- -q https://github.com/AravisProject/aravis/archive/refs/tags/$ARAVIS_VER.tar.gz | tar -C .deps -xzf -
+    - name: Check out ARAVIS
+      uses: actions/checkout@v7
+      with:
+        repository: AravisProject/aravis
+        path: .deps/aravis
 
     - name: Install dependencies via apt
       run: sudo apt-get update && sudo apt-get install -qq ccache intltool gtk-doc-tools libxml2-dev libglib2.0-dev
@@ -100,10 +103,12 @@ jobs:
         sudo cmake --install .deps/yarp/build
 
     - name: Build ARAVIS
-      working-directory: .deps/aravis-${{env.ARAVIS_VER}}
+      working-directory: .deps/aravis
       run: |
-        CC="ccache ${{matrix.system.compiler.cc}}" CXX="ccache ${{matrix.system.compiler.cxx}}" ./autogen.sh --enable-gtk-doc-html=no
-        make -j && sudo make install
+        sudo pip install meson ninja
+        meson setup build --auto-features=disabled -Dtests=false
+        meson compile -C build
+        sudo meson install -C build
 
     - name: Configure main project
       run: cmake -S . -B build #-DALLOW_DEVICE_PARAM_PARSER_GENERATION=ON
