@@ -2,6 +2,7 @@
 #define __ARAVIS_CAMERA_HPP__
 
 #include <map>
+#include <set>
 
 #include <yarp/dev/DeviceDriver.h>
 #include <yarp/dev/IFrameGrabberControls.h>
@@ -35,8 +36,6 @@ class AravisCamera : public yarp::dev::DeviceDriver,
                      public yarp::dev::IFrameGrabberControls
 {
 public:
-    ~AravisCamera() override { close(); }
-
     //  --------- DeviceDriver Declarations. Implementation in DeviceDriverImpl.cpp ---------
     bool open(yarp::os::Searchable & config) override;
     bool close() override;
@@ -78,6 +77,7 @@ private:
     void listAvailableFeatures();
     bool checkFeatureExistenceAndGetValue(const std::string & featureName, double & value);
     cameraFeature_id_t id_find(const std::string & feature_name);
+    bool getAvailablePixelFormats(std::set<std::string> & availablePixelFormats);
 
     ArvCamera       * camera {nullptr};      // camera to control
     ArvStream       * stream {nullptr};      // object for video stream reception

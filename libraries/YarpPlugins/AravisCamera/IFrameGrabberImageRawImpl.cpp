@@ -11,8 +11,6 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
     //-- Right now it is implemented as polling (grab + retrieve image)
     //-- I think it could be also implemented with callbacks with ArvStreamCallback
 
-    //-- Grab frame (get raw image)
-    //--------------------------------------------------------------------------------
     framebuffer = nullptr;
 
     if (stream == nullptr)
@@ -21,7 +19,7 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
         return false;
     }
 
-    ArvBuffer *arvBuffer = nullptr;
+    ArvBuffer * arvBuffer = nullptr;
     int max_tries = 10;
     int tries = 0;
     int success = false;
@@ -56,8 +54,6 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
         return false;
     }
 
-    //-- Retrieve frame (convert and send as yarp image)
-    //--------------------------------------------------------------------------------
     if (framebuffer != nullptr)
     {
         //-- Create a yarp image container according with the current pixel format

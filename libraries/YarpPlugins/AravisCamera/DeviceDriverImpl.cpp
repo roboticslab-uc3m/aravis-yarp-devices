@@ -2,7 +2,6 @@
 
 #include <string>
 #include <thread>
-#include <unordered_set>
 
 #include <yarp/os/LogStream.h>
 
@@ -22,7 +21,7 @@ bool AravisCamera::open(yarp::os::Searchable &config)
 
     if (index < 0 || index >= (int)arv_get_n_devices())
     {
-        yCError(ARV) << "Invalid device index, should be 0 <" << index << "<" << arv_get_n_devices();
+        yCError(ARV) << "Invalid device index, should be 0 <=" << index << "<" << arv_get_n_devices();
         return false;
     }
 
@@ -40,31 +39,22 @@ bool AravisCamera::open(yarp::os::Searchable &config)
         return false;
     }
 
-    std::unordered_set<std::string> availablePixelFormats;
+    std::set<std::string> availablePixelFormats;
+
+    if (!getAvailablePixelFormats(availablePixelFormats))
+    {
+        yCError(ARV) << "Failed to retrieve available pixel formats";
+        return false;
+    }
 
     if (config.check("introspection", "print available pixel formats on device init"))
     {
-        guint n_pixel_formats;
-        auto ** availableFormatsStrings = arv_camera_dup_available_pixel_formats_as_strings(camera, &n_pixel_formats, nullptr);
-        auto ** availableFormatsNames = arv_camera_dup_available_pixel_formats_as_display_names(camera, &n_pixel_formats, nullptr);
-
         yCInfo(ARV) << "Available pixel formats:";
 
-        for (int i = 0; i < n_pixel_formats; i++)
+        for (const auto pixelFormat : availablePixelFormats)
         {
-            yCInfo(ARV, "- %s (setting: %s)", availableFormatsNames[i], availableFormatsStrings[i]);
-            availablePixelFormats.emplace(availableFormatsStrings[i]);
+            yCInfo(ARV) << "-" << pixelFormat;
         }
-
-        yCInfo(ARV) << "Stored pixel formats in availablePixelFormats:";
-
-        for (const auto & format : availablePixelFormats)
-        {
-            yCInfo(ARV) << format;
-        }
-
-        g_free(availableFormatsStrings);
-        g_free(availableFormatsNames);
     }
 
     if (config.check("pixelFormat", "pixel format"))
@@ -73,19 +63,20 @@ bool AravisCamera::open(yarp::os::Searchable &config)
 
         if (availablePixelFormats.find(requestedPixelFormatString) == availablePixelFormats.end())
         {
-            yCError(ARV) << "Requested pixel format" << requestedPixelFormatString << " is not available";
+            yCError(ARV) << "Requested pixel format" << requestedPixelFormatString << "is not available";
             return false;
         }
 
-        yCInfo(ARV) << "Setting pixel format to " << requestedPixelFormatString;
+        yCInfo(ARV) << "Setting pixel format to" << requestedPixelFormatString;
 
         arv_camera_set_pixel_format_from_string(camera, requestedPixelFormatString.c_str(), nullptr);
 
         const char * appliedPixelFormatString = arv_camera_get_pixel_format_as_string(camera, nullptr);
+
         if (!appliedPixelFormatString || requestedPixelFormatString != appliedPixelFormatString)
         {
-            yCError(ARV) << "Pixel format change failed! Expected: " << requestedPixelFormatString
-                         << ", but got: " << (appliedPixelFormatString ? appliedPixelFormatString : "NULL");
+            yCError(ARV) << "Pixel format change failed! Expected" << requestedPixelFormatString
+                         << "but got:" << (appliedPixelFormatString ? appliedPixelFormatString : "NULL");
             return false;
         }
     }

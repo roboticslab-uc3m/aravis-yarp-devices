@@ -143,7 +143,7 @@ void AravisCamera::printFeatureInfo(cameraFeature_id_t featureId, const FeatureI
                 default: modeStr = "Unknown";
             }
 
-            yCInfo(ARV) << "  Mode: " << modeStr;
+            yCInfo(ARV) << "  Mode:" << modeStr;
         }
     }
 
@@ -151,28 +151,28 @@ void AravisCamera::printFeatureInfo(cameraFeature_id_t featureId, const FeatureI
     {
         if (bool isActive; getActive(featureId, &isActive))
         {
-            yCInfo(ARV) << "  Status: " << (isActive ? "Enabled" : "Disabled");
+            yCInfo(ARV) << "  Status:" << (isActive ? "Enabled" : "Disabled");
         }
     }
 
     if (double value; getFeature(featureId, &value))
     {
-        yCInfo(ARV) << "  Current value: " << value;
+        yCInfo(ARV) << "  Current value:" << value;
     }
 
     if (double min, max; getFeatureLimits(featureId, &min, &max))
     {
-        yCInfo(ARV) << "  Range: " << min << " to " << max;
+        yCInfo(ARV) << "  Range:" << min << "to" << max;
     }
 
     if (bool compatible; checkEnabled(featureId, &compatible))
     {
-        yCInfo(ARV) << "  Compatible with current format: " << (compatible ? "Yes" : "No");
+        yCInfo(ARV) << "  Compatible with current format:" << (compatible ? "Yes" : "No");
     }
 
     if (bool jauto; hasAuto(featureId, &jauto))
     {
-        yCInfo(ARV) << "  auto: " << (jauto ? "Yes" : "No");
+        yCInfo(ARV) << "  auto:" << (jauto ? "Yes" : "No");
     }
 }
 
@@ -197,7 +197,7 @@ bool AravisCamera::checkFeatureExistenceAndGetValue(const std::string & featureN
 
     if (id == YARP_FEATURE_INVALID)
     {
-        yCWarning(ARV) << "Feature not found: " << featureName;
+        yCWarning(ARV) << "Feature not found:" << featureName;
         return false;
     }
 
@@ -223,4 +223,22 @@ cameraFeature_id_t AravisCamera::id_find(const std::string & feature_name)
     }
 
     return YARP_FEATURE_INVALID;
+}
+
+bool AravisCamera::getAvailablePixelFormats(std::set<std::string> & availablePixelFormats)
+{
+    guint n_pixel_formats;
+
+    auto ** availableFormatsStrings = arv_camera_dup_available_pixel_formats_as_strings(camera, &n_pixel_formats, nullptr);
+    auto ** availableFormatsNames = arv_camera_dup_available_pixel_formats_as_display_names(camera, &n_pixel_formats, nullptr);
+
+    for (int i = 0; i < n_pixel_formats; i++)
+    {
+        availablePixelFormats.emplace(availableFormatsStrings[i]);
+    }
+
+    g_free(availableFormatsStrings);
+    g_free(availableFormatsNames);
+
+    return true;
 }
