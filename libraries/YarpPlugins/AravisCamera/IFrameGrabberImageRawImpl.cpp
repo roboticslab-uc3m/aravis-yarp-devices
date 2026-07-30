@@ -1,7 +1,5 @@
 #include "AravisCamera.hpp"
 
-#include <cstring> // std::memcpy
-
 #include <yarp/os/LogStream.h>
 
 #include "LogComponent.hpp"
@@ -56,18 +54,13 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
 
     if (framebuffer != nullptr)
     {
-        //-- Create a yarp image container according with the current pixel format
-        yarp::sig::Image raw_image;
-
         if (pixelFormat != ARV_PIXEL_FORMAT_MONO_8 && pixelFormat != ARV_PIXEL_FORMAT_BAYER_RG_8)
         {
             yCError(ARV) << "Unsupported pixel format";
         }
 
-        //-- Write data
-        image.zero();
         image.resize(_width, _height);
-        std::memcpy(image.getRawImage(), framebuffer, _width * _height * image.getPixelSize());
+        image.setExternal(framebuffer, _width, _height);
     }
     else
     {

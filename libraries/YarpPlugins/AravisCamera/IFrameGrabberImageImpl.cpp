@@ -1,7 +1,5 @@
 #include "AravisCamera.hpp"
 
-#include <cstring> // std::memcpy
-
 #include <opencv2/imgproc.hpp>
 
 #include <yarp/os/LogStream.h>
@@ -57,29 +55,27 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
 
     image.resize(_width, _height);
 
+    cv::Mat rgbImg;
+
     if (pixelFormat == ARV_PIXEL_FORMAT_BAYER_RG_8 ||
         pixelFormat == ARV_PIXEL_FORMAT_BAYER_RG_12P ||
         pixelFormat == ARV_PIXEL_FORMAT_BAYER_RG_16)
     {
         yCInfo(ARV) << "Processing Bayer image...";
         cv::Mat bayerImg(_height, _width, CV_8UC1, framebuffer);
-        cv::Mat rgbImg;
         cv::cvtColor(bayerImg, rgbImg, cv::COLOR_BayerRG2BGR);
-        std::memcpy(image.getRawImage(), rgbImg.data, _width * _height * 3);
     }
     else if (pixelFormat == ARV_PIXEL_FORMAT_YUV_422_PACKED ||
              pixelFormat == ARV_PIXEL_FORMAT_YUV_411_PACKED)
     {
         yCInfo(ARV) << "Processing YUV image...";
         cv::Mat ycbcrImg(_height, _width, CV_8UC2, framebuffer);
-        cv::Mat rgbImg;
-        cv::cvtColor(ycbcrImg, rgbImg, cv::COLOR_YUV2BGR_YUYV);
-        std::memcpy(image.getRawImage(), rgbImg.data, _width * _height * 3);
+        cv::cvtColor(ycbcrImg, rgbImg, cv::COLOR_YUV2RGB_UYVY);
     }
     else if (pixelFormat == ARV_PIXEL_FORMAT_RGB_8_PLANAR)
     {
         yCInfo(ARV) << "Processing RGB8 image...";
-        std::memcpy(image.getRawImage(), framebuffer, _width * _height * 3);
+        rgbImg = cv::Mat(_height, _width, CV_8UC3, framebuffer);
     }
     else if (pixelFormat == ARV_PIXEL_FORMAT_MONO_8 ||
              pixelFormat == ARV_PIXEL_FORMAT_MONO_12 ||
@@ -87,15 +83,15 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
     {
         yCInfo(ARV) << "Processing Mono image...";
         cv::Mat monoImg(_height, _width, CV_8UC1, framebuffer);
-        cv::Mat rgbImg;
-        cv::cvtColor(monoImg, rgbImg, cv::COLOR_GRAY2BGR);
-        std::memcpy(image.getRawImage(), rgbImg.data, _width * _height * 3);
+        cv::cvtColor(monoImg, rgbImg, cv::COLOR_GRAY2RGB);
     }
     else
     {
         yCError(ARV) << "Unsupported pixel format";
         return false;
     }
+
+    image.setExternal(rgbImg.data, _width, _height);
 
     return true;
 }
