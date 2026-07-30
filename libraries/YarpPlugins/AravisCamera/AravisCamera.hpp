@@ -78,10 +78,10 @@ private:
     bool checkFeatureExistenceAndGetValue(const std::string & featureName, double & value);
     cameraFeature_id_t id_find(const std::string & feature_name);
     bool getAvailablePixelFormats(std::set<std::string> & availablePixelFormats);
+    void * getFrameBuffer();
 
     ArvCamera       * camera {nullptr};      // camera to control
     ArvStream       * stream {nullptr};      // object for video stream reception
-    void            * framebuffer {nullptr}; //
 
     unsigned int    payload {0};            // width x height x pixel width
 
