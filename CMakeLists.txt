@@ -33,7 +33,7 @@ find_package(YARP 3.11 REQUIRED COMPONENTS os dev)
 find_package(Aravis 0.8.30 QUIET)
 find_package(OpenCV QUIET COMPONENTS imgproc)
 find_package(Doxygen QUIET)
-find_package(Python QUIET)
+find_package(Python3 3.5 QUIET)
 
 # Always build YARP devices as MODULE libraries.
 set(YARP_FORCE_DYNAMIC_PLUGINS TRUE CACHE INTERNAL "Force dynamic plugins")

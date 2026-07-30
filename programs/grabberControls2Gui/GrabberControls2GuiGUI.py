@@ -4,7 +4,7 @@ GrabberControls2Gui
 
 Simple GUI for controlling USB3/GigE cameras using Aravis and YARP
 
-Author: Álvaro Santos García
+Author: Álvaro Santos García, David Estévez Fernández
 Copyright: Universidad Carlos III de Madrid (C) 2025
 CopyPolicy: Released under the terms of the GNU LGPL v2.1
 """
@@ -12,10 +12,11 @@ CopyPolicy: Released under the terms of the GNU LGPL v2.1
 import os
 import ctypes
 import yarp
-from PySide2 import QtCore, QtGui, QtWidgets
-from PySide2 import QtUiTools
-from .CameraControl import Camera
 
+from PySide6 import QtCore, QtGui, QtWidgets
+from PySide6 import QtUiTools
+
+from .CameraControl import Camera
 
 def load_ui(file_name, where=None):
     """
@@ -38,7 +39,6 @@ def load_ui(file_name, where=None):
     ui_file.close()
 
     return ui
-
 
 class GrabberControls2GuiGUI(QtWidgets.QWidget):
     def __init__(self, controller, remote_port, parent=None):
@@ -887,7 +887,7 @@ class GrabberControls2GuiGUI(QtWidgets.QWidget):
                 self.opticalFilterCheckBox.setVisible(False)
 
     # -------------------------------------------------------------------------
-    # Slots de los sliders/spinBoxes -> llaman a métodos de controller (backend)
+    # Slots for sliders/spinBoxes -> see controller (backend)
     # -------------------------------------------------------------------------
     def onZoomSliderChanged(self):
         zoom = self.zoomSlider.value()

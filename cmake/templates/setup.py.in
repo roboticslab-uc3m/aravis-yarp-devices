@@ -8,12 +8,12 @@ from os.path import normpath # see https://github.com/roboticslab-uc3m/asibot-ma
 setup(name='aravis-yarp-devices',
       version='0.0.5',
       description = 'Useful yarp devices and programs to interact with those devices for robots',
-      author='David Estevez',
-      author_email="destevez@ing.uc3m.es",
+      author='Álvaro Santos García, David Estévez Fernández',
+      author_email="alvarosang2003@gmail.com, destevez@ing.uc3m.es",
       url='https://github.com/roboticslab-uc3m/aravis-yarp-devices/',
       packages=['GrabberControls2Gui'],
       package_dir={'GrabberControls2Gui': normpath('${CMAKE_SOURCE_DIR}/programs/grabberControls2Gui')},
       package_data={'GrabberControls2Gui': ['templates/*.ui']},
-      install_requires=['begins==0.9','PySide2==5.15.2'],
+      install_requires=['begins==0.9','PySide6==6.11.1'],
       entry_points={'gui_scripts': 'grabbercontrols2gui = GrabberControls2Gui.run:main.start'} # See https://pypi.python.org/pypi/begins/0.8#entry-points
 )

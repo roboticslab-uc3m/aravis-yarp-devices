@@ -11,8 +11,8 @@ CopyPolicy: Released under the terms of the GNU LGPL v2.1
 
 import yarp
 import ctypes
-from PySide2 import QtCore, QtGui, QtWidgets
 
+from PySide6 import QtCore, QtGui, QtWidgets
 
 class Camera(QtCore.QObject):
     def __init__(self, remote_port, parent_widget=None):

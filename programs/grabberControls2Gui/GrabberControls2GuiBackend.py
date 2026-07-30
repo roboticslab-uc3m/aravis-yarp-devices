@@ -4,14 +4,13 @@ GrabberControls2Gui
 
 Simple GUI for controlling USB3/GigE cameras using Aravis and YARP
 
-Author: Álvaro Santos García
+Authors: Álvaro Santos García, David Estévez Fernández
 Copyright: Universidad Carlos III de Madrid (C) 2025
 CopyPolicy: Released under the terms of the GNU LGPL v2.1
 """
 
 import logging
 import yarp
-
 
 class GrabberControls2GuiBackend:
     def __init__(self, controls):
