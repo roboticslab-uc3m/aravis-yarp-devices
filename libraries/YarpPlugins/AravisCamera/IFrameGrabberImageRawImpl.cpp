@@ -6,9 +6,6 @@
 
 bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
 {
-    //-- Right now it is implemented as polling (grab + retrieve image)
-    //-- I think it could be also implemented with callbacks with ArvStreamCallback
-
     void * framebuffer = getFrameBuffer();
 
     if (!framebuffer)

@@ -141,12 +141,6 @@ bool AravisCamera::getAvailablePixelFormats(std::set<std::string> & availablePix
 
 void * AravisCamera::getFrameBuffer()
 {
-    if (!stream)
-    {
-        yCError(ARV) << "Stream was not initialized";
-        return nullptr;
-    }
-
     ArvBuffer * arvBuffer = nullptr;
     static constexpr int max_tries = 10;
     int tries = 0;
@@ -155,15 +149,17 @@ void * AravisCamera::getFrameBuffer()
     while (!success && tries++ < max_tries)
     {
         static constexpr guint64 timeout = 200000; // 200 ms
-        arvBuffer = arv_stream_timeout_pop_buffer(stream, timeout);
 
-        if (arvBuffer && arv_buffer_get_status(arvBuffer) == ARV_BUFFER_STATUS_SUCCESS)
+        if (arvBuffer = arv_stream_timeout_pop_buffer(stream, timeout); arvBuffer)
         {
-            success = true;
-        }
-        else if (arvBuffer)
-        {
-            arv_stream_push_buffer(stream, arvBuffer);
+            if (arv_buffer_get_status(arvBuffer) == ARV_BUFFER_STATUS_SUCCESS)
+            {
+                success = true;
+            }
+            else
+            {
+                arv_stream_push_buffer(stream, arvBuffer);
+            }
         }
     }
 
@@ -173,12 +169,9 @@ void * AravisCamera::getFrameBuffer()
         return nullptr;
     }
 
-    size_t buffer_size;
-    gint xoffset, yoffset;
+    auto * framebuffer = const_cast<void *>(arv_buffer_get_data(arvBuffer, nullptr));
 
-    auto * framebuffer = const_cast<void *>(arv_buffer_get_data(arvBuffer, &buffer_size));
-    arv_buffer_get_image_region(arvBuffer, &xoffset, &yoffset, &_width, &_height);
-    guint64 frameID = arv_buffer_get_frame_id(arvBuffer);
+    arv_buffer_get_image_region(arvBuffer, nullptr, nullptr, &_width, &_height);
     arv_stream_push_buffer(stream, arvBuffer);
 
     return framebuffer;
