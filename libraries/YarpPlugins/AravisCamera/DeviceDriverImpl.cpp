@@ -7,12 +7,12 @@
 
 #include "LogComponent.hpp"
 
-bool AravisCamera::open(yarp::os::Searchable &config)
+bool AravisCamera::open(yarp::os::Searchable & config)
 {
     if (config.check("fake", "enable fake Aravis camera"))
     {
         yCInfo(ARV) << "Enabling fake Aravis camera";
-        arv_enable_interface("Fake"); //-- Enables fake Aravis cameras (useful for debug / testing)
+        arv_enable_interface("Fake"); // useful for debug / testing
     }
 
     int index = config.check("index", yarp::os::Value(0), "camera index").asInt32();
@@ -51,9 +51,9 @@ bool AravisCamera::open(yarp::os::Searchable &config)
     {
         yCInfo(ARV) << "Available pixel formats:";
 
-        for (const auto pixelFormat : availablePixelFormats)
+        for (const auto format : availablePixelFormats)
         {
-            yCInfo(ARV) << "-" << pixelFormat;
+            yCInfo(ARV) << "-" << format;
         }
     }
 
@@ -87,6 +87,8 @@ bool AravisCamera::open(yarp::os::Searchable &config)
 
     pixelFormat = arv_camera_get_pixel_format(camera, nullptr);
 
+    gint widthMin, widthMax, heightMin, heightMax;
+
     arv_camera_get_width_bounds(camera, &widthMin, &widthMax, nullptr);
     arv_camera_get_height_bounds(camera, &heightMin, &heightMax, nullptr);
     arv_camera_set_region(camera, 0, 0, widthMax, heightMax, nullptr);
@@ -96,9 +98,11 @@ bool AravisCamera::open(yarp::os::Searchable &config)
 
     if (bool fpsAvailable = arv_camera_is_frame_rate_available(camera, nullptr); fpsAvailable)
     {
+        double fpsMin, fpsMax;
         arv_camera_get_frame_rate_bounds(camera, &fpsMin, &fpsMax, nullptr);
         yCInfo(ARV, "FPS range: min=%f max=%f", fpsMin, fpsMax);
-        fps = arv_camera_get_frame_rate(camera, nullptr);
+
+        double fps = arv_camera_get_frame_rate(camera, nullptr);
         yCInfo(ARV) << "Current FPS value:" << fps;
     }
     else
@@ -108,9 +112,11 @@ bool AravisCamera::open(yarp::os::Searchable &config)
 
     if (bool gainAvailable = arv_camera_is_gain_available(camera, nullptr); gainAvailable)
     {
+        double gainMin, gainMax;
         arv_camera_get_gain_bounds(camera, &gainMin, &gainMax, nullptr);
         yCInfo(ARV, "Gain range: min=%f max=%f", gainMin, gainMax);
-        gain = arv_camera_get_gain(camera, nullptr);
+
+        double gain = arv_camera_get_gain(camera, nullptr);
         yCInfo(ARV) << "Current gain value:" << gain;
     }
     else
@@ -120,9 +126,11 @@ bool AravisCamera::open(yarp::os::Searchable &config)
 
     if (bool exposureAvailable = arv_camera_is_exposure_time_available(camera, nullptr); exposureAvailable)
     {
+        double exposureMin, exposureMax;
         arv_camera_get_exposure_time_bounds(camera, &exposureMin, &exposureMax, nullptr);
         yCInfo(ARV, "Exposure range: min=%f max=%f", exposureMin, exposureMax);
-        exposure = arv_camera_get_exposure_time(camera, nullptr);
+
+        double exposure = arv_camera_get_exposure_time(camera, nullptr);
         yCInfo(ARV) << "Current exposure value:" << exposure;
     }
     else
@@ -170,7 +178,9 @@ bool AravisCamera::open(yarp::os::Searchable &config)
     g_object_set(stream, "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
     g_object_set(stream, "packet-timeout", (unsigned) 40000, "frame-retention", (unsigned) 200000, nullptr);
 
-    payload = arv_camera_get_payload(camera, nullptr);
+    guint payload = arv_camera_get_payload(camera, nullptr);
+
+    static constexpr int num_buffers = 50; // number of payload transmission buffers
 
     for (int i = 0; i < num_buffers; i++)
     {

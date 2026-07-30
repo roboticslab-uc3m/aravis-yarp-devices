@@ -48,9 +48,6 @@ public:
     int height() const override;
     int width() const override;
 
-    // ---------- Terminal ----------------------
-
-
     // ---------- IFrameGrabberControls Declarations. Implementation in IFrameGrabberControlsImpl.cpp ---------
     bool getCameraDescription(CameraDescriptor * camera) override;
     bool hasFeature(int feature, bool * hasFeature) override;
@@ -80,44 +77,14 @@ private:
     bool getAvailablePixelFormats(std::set<std::string> & availablePixelFormats);
     void * getFrameBuffer();
 
-    ArvCamera       * camera {nullptr};      // camera to control
-    ArvStream       * stream {nullptr};      // object for video stream reception
+    ArvCamera * camera {nullptr};
+    ArvStream * stream {nullptr};
 
-    unsigned int    payload {0};            // width x height x pixel width
+    ArvPixelFormat pixelFormat {0};
 
-    int             widthMin {0};           // camera sensor minium width
-    int             widthMax {0};           // camera sensor maximum width
-    int             heightMin {0};          // camera sensor minium height
-    int             heightMax {0};          // camera sensor maximum height
-    double          fpsMin {0.0};           // camera minimum fps
-    double          fpsMax {0.0};           // camera maximum fps
-    double          gainMin {0.0};          // camera minimum gain
-    double          gainMax {0.0};          // camera maximum gain
-    double          exposureMin {0.0};      // camera's minimum exposure time
-    double          exposureMax {0.0};      // camera's maximum exposure time
+    int _width {0};
+    int _height {0};
 
-    bool            controlExposure {false}; // flag if automatic exposure shall be done by this SW
-
-    guint           pixelFormatsCnt;
-
-
-    int             num_buffers {50};       // number of payload transmission buffers
-
-    ArvPixelFormat  pixelFormat;            // pixel format
-
-    int             xoffset {0};            // current frame region x offset
-    int             yoffset {0};            // current frame region y offset
-    int             _width {0};             // current frame width of frame
-    int             _height {0};            // current frame height of image
-
-    double          fps {0.0};              // current value of fps
-    double          exposure {0.0};         // current value of exposure time
-    double          gain {0.0};             // current value of gain
-
-    unsigned        frameID {0};            // current frame id
-    unsigned        prevFrameID {0};
-
-    // Feature map with all the metadata
     const std::map<cameraFeature_id_t, FeatureInfo> yarp_arv_int_feature_map = {
         {YARP_FEATURE_BRIGHTNESS, {"Brightness", "BrightnessEnabled", "BrightnessAuto", false}},
         {YARP_FEATURE_SHUTTER, {"Shutter", "ShutterEnabled", "ShutterAuto", true}},

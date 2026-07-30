@@ -278,9 +278,11 @@ void * AravisCamera::getFrameBuffer()
     }
 
     size_t buffer_size;
+    gint xoffset, yoffset;
+
     auto * framebuffer = const_cast<void *>(arv_buffer_get_data(arvBuffer, &buffer_size));
     arv_buffer_get_image_region(arvBuffer, &xoffset, &yoffset, &_width, &_height);
-    frameID = arv_buffer_get_frame_id(arvBuffer);
+    guint64 frameID = arv_buffer_get_frame_id(arvBuffer);
     arv_stream_push_buffer(stream, arvBuffer);
 
     return framebuffer;
