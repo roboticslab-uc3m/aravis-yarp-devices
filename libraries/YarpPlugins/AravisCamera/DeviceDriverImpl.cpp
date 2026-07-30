@@ -1,36 +1,32 @@
-#include "AravisGigE.hpp"
+#include "AravisCamera.hpp"
 
 #include <string>
-#include <unordered_set>
+#include <thread>
 
 #include <yarp/os/LogStream.h>
 
 #include "LogComponent.hpp"
 
-bool AravisGigE::open(yarp::os::Searchable &config)
+bool AravisCamera::open(yarp::os::Searchable & config)
 {
-    //-- Configuration of Aravis GigE Camera device
     if (config.check("fake", "enable fake Aravis camera"))
     {
         yCInfo(ARV) << "Enabling fake Aravis camera";
-        arv_enable_interface("Fake"); //-- Enables fake Aravis cameras (useful for debug / testing)
+        arv_enable_interface("Fake"); // useful for debug / testing
     }
 
-    //-- Open Aravis device(s)
-    //-------------------------------------------------------------------------------
     int index = config.check("index", yarp::os::Value(0), "camera index").asInt32();
 
     arv_update_device_list();
 
     if (index < 0 || index >= (int)arv_get_n_devices())
     {
-        yCError(ARV) << "Invalid device index, should be 0 <" << index << "<" << arv_get_n_devices();
+        yCError(ARV) << "Invalid device index, should be 0 <=" << index << "<" << arv_get_n_devices();
         return false;
     }
 
     const auto * deviceName = arv_get_device_id(index);
 
-    //-- Create Aravis camera
     camera = arv_camera_new(deviceName, nullptr);
 
     if (camera != nullptr)
@@ -43,32 +39,27 @@ bool AravisGigE::open(yarp::os::Searchable &config)
         return false;
     }
 
-    //-- Once we have a camera, we obtain the camera properties limits and initial values
-    std::unordered_set<std::string> availablePixelFormats;
+    std::set<std::string> availablePixelFormats;
+
+    if (!getAvailablePixelFormats(availablePixelFormats))
+    {
+        yCError(ARV) << "Failed to retrieve available pixel formats";
+        return false;
+    }
 
     if (config.check("introspection", "print available pixel formats on device init"))
     {
-        //-- List all  available formats
-        guint n_pixel_formats;
-        auto ** availableFormatsStrings = arv_camera_dup_available_pixel_formats_as_strings(camera, &n_pixel_formats, nullptr);
-        auto ** availableFormatsNames = arv_camera_dup_available_pixel_formats_as_display_names(camera, &n_pixel_formats, nullptr);
-
         yCInfo(ARV) << "Available pixel formats:";
 
-        for (int i = 0; i < n_pixel_formats; i++)
+        for (const auto format : availablePixelFormats)
         {
-            yCInfo(ARV, "- %s (setting: %s)", availableFormatsNames[i], availableFormatsStrings[i]);
-            availablePixelFormats.emplace(availableFormatsStrings[i]);
+            yCInfo(ARV) << "-" << format;
         }
-
-        g_free(availableFormatsStrings);
-        g_free(availableFormatsNames);
     }
 
     if (config.check("pixelFormat", "pixel format"))
     {
-        //-- Set pixel format
-        auto requestedPixelFormatString = config.find("pixelFormat").asString();
+        std::string requestedPixelFormatString = config.find("pixelFormat").asString();
 
         if (availablePixelFormats.find(requestedPixelFormatString) == availablePixelFormats.end())
         {
@@ -79,6 +70,15 @@ bool AravisGigE::open(yarp::os::Searchable &config)
         yCInfo(ARV) << "Setting pixel format to" << requestedPixelFormatString;
 
         arv_camera_set_pixel_format_from_string(camera, requestedPixelFormatString.c_str(), nullptr);
+
+        const char * appliedPixelFormatString = arv_camera_get_pixel_format_as_string(camera, nullptr);
+
+        if (!appliedPixelFormatString || requestedPixelFormatString != appliedPixelFormatString)
+        {
+            yCError(ARV) << "Pixel format change failed! Expected" << requestedPixelFormatString
+                         << "but got:" << (appliedPixelFormatString ? appliedPixelFormatString : "NULL");
+            return false;
+        }
     }
     else
     {
@@ -87,6 +87,8 @@ bool AravisGigE::open(yarp::os::Searchable &config)
 
     pixelFormat = arv_camera_get_pixel_format(camera, nullptr);
 
+    gint widthMin, widthMax, heightMin, heightMax;
+
     arv_camera_get_width_bounds(camera, &widthMin, &widthMax, nullptr);
     arv_camera_get_height_bounds(camera, &heightMin, &heightMax, nullptr);
     arv_camera_set_region(camera, 0, 0, widthMax, heightMax, nullptr);
@@ -94,14 +96,13 @@ bool AravisGigE::open(yarp::os::Searchable &config)
     yCInfo(ARV, "Width range: min=%d max=%d", widthMin, widthMax);
     yCInfo(ARV, "Height range: min=%d max=%d", heightMin, heightMax);
 
-    bool fpsAvailable = arv_camera_is_frame_rate_available(camera, nullptr);
-
-    if (fpsAvailable)
+    if (bool fpsAvailable = arv_camera_is_frame_rate_available(camera, nullptr); fpsAvailable)
     {
+        double fpsMin, fpsMax;
         arv_camera_get_frame_rate_bounds(camera, &fpsMin, &fpsMax, nullptr);
         yCInfo(ARV, "FPS range: min=%f max=%f", fpsMin, fpsMax);
 
-        fps = arv_camera_get_frame_rate(camera, nullptr);
+        double fps = arv_camera_get_frame_rate(camera, nullptr);
         yCInfo(ARV) << "Current FPS value:" << fps;
     }
     else
@@ -109,14 +110,13 @@ bool AravisGigE::open(yarp::os::Searchable &config)
         yCWarning(ARV) << "FPS property not available";
     }
 
-    bool gainAvailable = arv_camera_is_gain_available(camera, nullptr);
-
-    if (gainAvailable)
+    if (bool gainAvailable = arv_camera_is_gain_available(camera, nullptr); gainAvailable)
     {
+        double gainMin, gainMax;
         arv_camera_get_gain_bounds(camera, &gainMin, &gainMax, nullptr);
         yCInfo(ARV, "Gain range: min=%f max=%f", gainMin, gainMax);
 
-        gain = arv_camera_get_gain(camera, nullptr);
+        double gain = arv_camera_get_gain(camera, nullptr);
         yCInfo(ARV) << "Current gain value:" << gain;
     }
     else
@@ -124,22 +124,20 @@ bool AravisGigE::open(yarp::os::Searchable &config)
         yCWarning(ARV) << "Gain property not available";
     }
 
-    bool exposureAvailable = arv_camera_is_exposure_time_available(camera, nullptr);
-
-    if (exposureAvailable)
+    if (bool exposureAvailable = arv_camera_is_exposure_time_available(camera, nullptr); exposureAvailable)
     {
+        double exposureMin, exposureMax;
         arv_camera_get_exposure_time_bounds(camera, &exposureMin, &exposureMax, nullptr);
         yCInfo(ARV, "Exposure range: min=%f max=%f", exposureMin, exposureMax);
 
-        exposure = arv_camera_get_exposure_time(camera, nullptr);
+        double exposure = arv_camera_get_exposure_time(camera, nullptr);
         yCInfo(ARV) << "Current exposure value:" << exposure;
     }
     else
     {
-        yCWarning(ARV) << "Gain property not available";
+        yCWarning(ARV) << "Exposure property not available";
     }
 
-    //-- Lens controls availability
     yCInfo(ARV) << "Checking Lens Controls availability";
 
     if (gint64 zoomMin, zoomMax; arv_device_get_feature(arv_camera_get_device(camera), "Zoom") != nullptr)
@@ -162,10 +160,6 @@ bool AravisGigE::open(yarp::os::Searchable &config)
         yCWarning(ARV) << "Focus property not available";
     }
 
-    //-- Start capturing images
-    //-------------------------------------------------------------------------------
-
-    //-- Initialization of buffer(s)
     if (stream)
     {
         g_object_unref(stream);
@@ -180,27 +174,40 @@ bool AravisGigE::open(yarp::os::Searchable &config)
         return false;
     }
 
-    g_object_set(stream, "socket-buffer", ARV_GV_STREAM_SOCKET_BUFFER_AUTO, "socket-buffer-size", 0, nullptr);
-    g_object_set(stream, "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
-    g_object_set(stream, "packet-timeout", (unsigned) 40000, "frame-retention", (unsigned) 200000, nullptr);
+    if (arv_camera_is_gv_device(camera))
+    {
+        g_object_set(stream, "socket-buffer", ARV_GV_STREAM_SOCKET_BUFFER_AUTO, "socket-buffer-size", 0, nullptr);
+        g_object_set(stream, "packet-resend", ARV_GV_STREAM_PACKET_RESEND_NEVER, nullptr);
+        g_object_set(stream, "packet-timeout", (unsigned) 40000, "frame-retention", (unsigned) 200000, nullptr);
+    }
 
-    payload = arv_camera_get_payload(camera, nullptr);
+    guint payload = arv_camera_get_payload(camera, nullptr);
+
+    static constexpr int num_buffers = 50; // number of payload transmission buffers
 
     for (int i = 0; i < num_buffers; i++)
     {
         arv_stream_push_buffer(stream, arv_buffer_new(payload, nullptr));
     }
 
-    //-- Start continuous acquisition
     arv_camera_set_acquisition_mode(camera, ARV_ACQUISITION_MODE_CONTINUOUS, nullptr);
     arv_device_set_string_feature_value(arv_camera_get_device(camera), "TriggerMode" , "Off", nullptr);
     arv_camera_start_acquisition(camera, nullptr);
 
     yCInfo(ARV) << "Aravis Camera acquisition started!";
+
+    if (config.check("terminal", "enable interactive terminal"))
+    {
+        yCInfo(ARV) << "Entering interactive mode...";
+        yarp::os::Log::setPrintCallback(nullptr); // disable default logging to console
+        std::thread t(&AravisCamera::runInteractiveTerminal, this);
+        t.detach();
+    }
+
     return true;
 }
 
-bool AravisGigE::close()
+bool AravisCamera::close()
 {
     if (camera == nullptr)
     {
@@ -211,7 +218,6 @@ bool AravisGigE::close()
     arv_camera_stop_acquisition(camera, nullptr);
     yCInfo(ARV) << "Aravis Camera acquisition stopped!";
 
-    //-- Cleanup
     if (stream)
     {
         g_object_unref(stream);

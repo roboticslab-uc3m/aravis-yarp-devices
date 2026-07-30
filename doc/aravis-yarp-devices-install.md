@@ -1,11 +1,14 @@
 # Installation from Source Code
 
-First install the dependencies:
+First install the mandatory dependencies:
 - [Install CMake 3.19+](https://github.com/roboticslab-uc3m/installation-guides/blob/master/docs/install-cmake.md/)
 - [Install YCM 0.11+](https://github.com/roboticslab-uc3m/installation-guides/blob/master/docs/install-ycm.md/)
 - [Install YARP 3.11+](https://github.com/roboticslab-uc3m/installation-guides/blob/master/docs/install-yarp.md/)
 
-For unit testing, you'll need the googletest source package. Refer to [Install googletest](https://github.com/roboticslab-uc3m/installation-guides/blob/master/docs/install-googletest.md/).
+### Components with known additional/specific dependencies
+
+- [../libraries/YarpPlugins/AravisCamera](../libraries/YarpPlugins/AravisCamera#requirements)
+- [../programs/grabberControls2Gui](../programs/grabberControls2Gui#requirements)
 
 ## Installation (Ubuntu)
 
@@ -22,11 +25,3 @@ sudo ldconfig  # Just in case
 ```
 
 Remember to enable the devices you want to compile using `ccmake` instead of `cmake`.
-
-### Useful info to install GrabberControls2Gui
-
-When installing GrabberControls2Gui, take into account the following points:
-
-* GrabberControls2Gui requires Python 3+ with custom yarp Python bindings installed. Currently, installing them is not an easy task (see [comment348230791@roboticslab-uc3m/yarp-devices#145](https://github.com/roboticslab-uc3m/yarp-devices/issues/145#issuecomment-348230791) and [roboticslab-uc3m/installation-guides#26](https://github.com/roboticslab-uc3m/installation-guides/issues/26)) but we expect this to change in the future.
-
-* Setup.py should take care of automatically installing the remaining dependencies for AravisGigEController (`sudo python3 setup.py install`).

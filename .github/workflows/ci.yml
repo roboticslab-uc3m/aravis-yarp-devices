@@ -12,7 +12,6 @@ env:
   CMAKE_C_COMPILER_LAUNCHER: ccache
   CMAKE_CXX_COMPILER_LAUNCHER: ccache
   CMAKE_BUILD_TYPE: Debug
-  ARAVIS_VER: ARAVIS_0_6_4
 
 jobs:
   maybe_skip:
@@ -66,14 +65,8 @@ jobs:
         ref: ${{matrix.robotology.yarp}}
         path: .deps/yarp
 
-    - name: Check out ARAVIS
-      uses: actions/checkout@v7
-      with:
-        repository: AravisProject/aravis
-        path: .deps/aravis
-
     - name: Install dependencies via apt
-      run: sudo apt-get update && sudo apt-get install -qq ccache intltool gtk-doc-tools libxml2-dev libglib2.0-dev
+      run: sudo apt-get update && sudo apt-get install -qq ccache libaravis-dev libusb-1.0-0-dev libopencv-dev
 
     - name: Set up CMake
       uses: jwlawson/actions-setup-cmake@v2
@@ -101,14 +94,6 @@ jobs:
         cmake -S .deps/yarp -B .deps/yarp/build -DSKIP_ACE=ON -DYARP_DISABLE_VERSION_SOURCE=ON
         cmake --build .deps/yarp/build
         sudo cmake --install .deps/yarp/build
-
-    - name: Build ARAVIS
-      working-directory: .deps/aravis
-      run: |
-        sudo pip install meson ninja
-        meson setup build --auto-features=disabled -Dtests=false
-        meson compile -C build
-        sudo meson install -C build
 
     - name: Configure main project
       run: cmake -S . -B build #-DALLOW_DEVICE_PARAM_PARSER_GENERATION=ON
