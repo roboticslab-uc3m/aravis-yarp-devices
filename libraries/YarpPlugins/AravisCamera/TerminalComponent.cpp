@@ -24,9 +24,115 @@ namespace
     }
 }
 
+void AravisCamera::printFeatureInfo(cameraFeature_id_t featureId, const FeatureInfo & info)
+{
+    if (bool available = false; !hasFeature(featureId, &available) || !available)
+    {
+        return;
+    }
+
+    std::cout << "- " << info.featureName << " (ID " << featureId << "):\n";
+
+    if (info.autoName)
+    {
+        if (FeatureMode mode; getMode(featureId, &mode))
+        {
+            std::string modeStr;
+
+            switch (mode)
+            {
+                case MODE_AUTO: modeStr = "Auto"; break;
+                case MODE_MANUAL: modeStr = "Manual"; break;
+                default: modeStr = "Unknown";
+            }
+
+            std::cout << "  Mode: " << modeStr << "\n";
+        }
+    }
+
+    if (info.enabledName)
+    {
+        if (bool isActive; getActive(featureId, &isActive))
+        {
+            std::cout << "  Status: " << (isActive ? "Enabled" : "Disabled") << "\n";
+        }
+    }
+
+    if (double value; getFeature(featureId, &value))
+    {
+        std::cout << "  Current value: " << value << "\n";
+    }
+
+    if (double min, max; getFeatureLimits(featureId, &min, &max))
+    {
+        std::cout << "  Range: " << min << " to " << max << "\n";
+    }
+
+    if (bool compatible; checkEnabled(featureId, &compatible))
+    {
+        std::cout << "  Compatible with current format: " << (compatible ? "yes" : "no") << "\n";
+    }
+
+    if (bool jauto; hasAuto(featureId, &jauto))
+    {
+        std::cout << "  Has auto: " << (jauto ? "yes" : "no") << "\n";
+    }
+}
+
+void AravisCamera::listAvailableFeatures()
+{
+    std::cout << "Listing available features:\n";
+
+    for (const auto & [id, info] : yarp_arv_int_feature_map)
+    {
+        printFeatureInfo(id, info);
+    }
+
+    for (const auto & [id, info] : yarp_arv_float_feature_map)
+    {
+        printFeatureInfo(id, info);
+    }
+}
+
+bool AravisCamera::checkFeatureExistenceAndGetValue(const std::string & featureName, double & value)
+{
+    cameraFeature_id_t id = id_find(featureName);
+
+    if (id == YARP_FEATURE_INVALID)
+    {
+        std::cout << "Feature not found: " << featureName << "\n";
+        return false;
+    }
+
+    return getFeature(id, &value);
+}
+
+cameraFeature_id_t AravisCamera::id_find(const std::string & feature_name)
+{
+    for (const auto [id, info] : yarp_arv_int_feature_map)
+    {
+        if (std::string(info.featureName) == feature_name)
+        {
+            return id;
+        }
+    }
+
+    for (const auto [id, info] : yarp_arv_float_feature_map)
+    {
+        if (std::string(info.featureName) == feature_name)
+        {
+            return id;
+        }
+    }
+
+    return YARP_FEATURE_INVALID;
+}
+
 void AravisCamera::runInteractiveTerminal()
 {
     std::string command;
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     while (true)
     {

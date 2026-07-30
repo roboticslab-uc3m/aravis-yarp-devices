@@ -66,16 +66,19 @@ public:
     bool setOnePush(int feature) override;
 
 private:
-    void runInteractiveTerminal();
+    // ---------- Generic helpers. Implementation in IFrameGrabberControlsImpl.cpp ---------
     bool getFeatureLimits(int feature, double * min, double * max);
     bool checkEnabled(cameraFeature_id_t feature, bool * compatible);
     const FeatureInfo * getFeatureInfo(cameraFeature_id_t feature);
+    bool getAvailablePixelFormats(std::set<std::string> & availablePixelFormats);
+    void * getFrameBuffer();
+
+    // ---------- Terminal helpers. Implementation in TerminalComponent.cpp ---------
     void printFeatureInfo(cameraFeature_id_t featureId, const FeatureInfo & info);
     void listAvailableFeatures();
     bool checkFeatureExistenceAndGetValue(const std::string & featureName, double & value);
     cameraFeature_id_t id_find(const std::string & feature_name);
-    bool getAvailablePixelFormats(std::set<std::string> & availablePixelFormats);
-    void * getFrameBuffer();
+    void runInteractiveTerminal();
 
     ArvCamera * camera {nullptr};
     ArvStream * stream {nullptr};

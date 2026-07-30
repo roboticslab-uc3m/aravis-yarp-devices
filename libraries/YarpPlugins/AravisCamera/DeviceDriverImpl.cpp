@@ -196,8 +196,7 @@ bool AravisCamera::open(yarp::os::Searchable & config)
     if (config.check("terminal", "enable interactive terminal"))
     {
         yCInfo(ARV) << "Entering interactive mode...";
-        useLogFile = true;
-        yarp::os::Log::setPrintCallback(customLogCallback);
+        yarp::os::Log::setPrintCallback(nullptr); // disable default logging to console
         std::thread t(&AravisCamera::runInteractiveTerminal, this);
         t.detach();
     }
