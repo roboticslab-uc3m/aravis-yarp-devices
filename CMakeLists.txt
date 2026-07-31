@@ -31,7 +31,10 @@ find_package(YARP 3.11 REQUIRED COMPONENTS os dev)
 
 # Soft dependencies.
 find_package(Aravis 0.8.30 QUIET)
-find_package(OpenCV QUIET COMPONENTS imgproc)
+find_package(OpenCV 4.6 QUIET COMPONENTS imgproc)
+if(NOT OpenCV_FOUND)
+    find_package(OpenCV 5.0 QUIET COMPONENTS imgproc)
+endif()
 find_package(Doxygen QUIET)
 find_package(Python3 3.5 QUIET)
 
