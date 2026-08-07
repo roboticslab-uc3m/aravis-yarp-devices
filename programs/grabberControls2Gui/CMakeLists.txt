@@ -5,15 +5,6 @@ endif()
 cmake_dependent_option(ENABLE_grabbercontrols2gui "Enable/disable grabbercontrols2gui program" ON
                        Python3_FOUND OFF)
 
-if(ENABLE_grabbercontrols2gui)
-
-    configure_file("${CMAKE_SOURCE_DIR}/cmake/templates/setup.py.in"
-                   "${CMAKE_BINARY_DIR}/setup.py")
-
-    install(CODE "execute_process(COMMAND \"${Python3_EXECUTABLE}\" -m pip install --break-system-packages \"${CMAKE_BINARY_DIR}\")")
-
-else()
-
+if(NOT ENABLE_grabbercontrols2gui)
     set(ENABLE_grabbercontrols2gui OFF CACHE BOOL "Enable/disable grabbercontrols2gui program" FORCE)
-
 endif()

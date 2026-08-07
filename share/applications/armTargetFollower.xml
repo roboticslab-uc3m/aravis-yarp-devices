@@ -1,0 +1,135 @@
+<application>
+    <name>armTargetFollower app</name>
+
+    <!-- ================================ Launch for Aruco =============================== -->
+    <!-- Aravis -->
+    <module>
+        <name>yarpdev</name>
+        <parameters>--device AravisGigE</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpdev</name>
+        <parameters>--device opencv_grabber</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>rgbDetection</name>
+        <parameters>--detector ArucoDetector</parameters>
+        <node>localhost</node>
+        <depends>
+            <modulename>yarpdev</modulename>
+        </depends>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /rgbDetection/yarpview/img:i --out /click</parameters>
+        <node>localhost</node>
+    </module>
+
+    <connection>
+        <from>/rgbDetection/img:o</from>
+        <to>/rgbDetection/yarpview/img:i</to>
+    </connection>
+    <connection>
+        <from>/click</from>
+        <to>/rgbDetection/crop:i</to>
+    </connection>
+
+    <module>
+        <name>gnome-terminal</name>
+        <parameters>-e "yarp read ... /rgbDetection/state:o"</parameters>
+        <node>localhost</node>
+    </module>
+
+    <!-- ============================ Head Modules ============================================-->
+    <module>
+        <name>BasicCartesianControl</name>
+        <parameters>--name /teoSim/head/CartesianControl --kinematics teo-fixedTrunk-head-rgb.ini --ikPos st --local /BasicCartesianControl/teoSim/head --remote /teoSim/head</parameters>
+        <node>localhost</node>
+        <deployer>yarpdev</deployer>
+    </module>
+
+    <module>
+        <name>BasicCartesianControl</name>
+        <parameters>--name /teoSim/rightArm/CartesianControl --kinematics teo-fixedTrunk-rightArm-fetch.ini --ikPos st --local /BasicCartesianControl/teoSim/rightArm --remote /teoSim/rightArm</parameters>
+        <node>localhost</node>
+        <deployer>yarpdev</deployer>
+    </module>
+
+    <!-- ========================== Depth ==============================================-->
+    <!-- rgbDetection -->
+    <module>
+        <name>rgbdDetection</name>
+        <parameters>--detector HaarDetector --xmlCascade haarcascade_person.xml</parameters>
+        <node>localhost</node>
+        <depends>
+            <modulename>yarpdev</modulename>
+        </depends>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /rgbdDetection/yarpview/img:i</parameters>
+        <node>localhost</node>
+    </module>
+
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /rgbdDetection/yarpview/img:i</parameters>
+        <node>localhost</node>
+    </module>
+    <connection>
+        <from>/rgbdDetection/img:o</from>
+        <to>/rgbdDetection/yarpview/img:i</to>
+    </connection>
+
+    <module>
+        <name>gnome-terminal</name>
+        <parameters>-e "yarp read ... /rgbdDetection/state:o"</parameters>
+        <node>localhost</node>
+    </module>
+
+    <!-- ==================================== Teo ==========================================-->
+    <!-- RgbdDetection: D, Mono -->
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /yarpview/teoSim/depthImageMono:i --title "Depth mono"</parameters>
+        <node>localhost</node>
+    </module>
+
+    <connection>
+        <from>/teoSim/camera/depthImage:o</from>
+        <to>/yarpview/teoSim/depthImageMono:i</to>
+        <protocol>udp+recv.portmonitor+type.dll+file.depthimage_to_mono</protocol>
+    </connection>
+
+    <!-- RgbdDetection: D, Green -->
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /yarpview/teoSim/depthImageRGB:i --title "Depth RGB"</parameters>
+        <node>localhost</node>
+    </module>
+
+    <connection>
+        <from>/teoSim/camera/depthImage:o</from>
+        <to>/yarpview/teoSim/depthImageRGB:i</to>
+        <protocol>udp+recv.portmonitor+type.dll+file.depthimage_to_rgb</protocol>
+    </connection>
+
+    <!-- Teo camera -->
+    <module>
+        <name>yarpview</name>
+        <parameters>--name /yarpview/teoSim/rgbImage:o</parameters>
+        <node>localhost</node>
+    </module>
+
+    <connection>
+        <from>/teoSim/camera/rgbImage:o</from>
+        <to>/yarpview/teoSim/rgbImage:o</to>
+    </connection>
+
+</application>
