@@ -4,14 +4,22 @@
 
 #include "LogComponent.hpp"
 
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+yarp::dev::ReturnValue AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
+#else
 bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
+#endif
 {
     void * framebuffer = getFrameBuffer();
 
     if (!framebuffer)
     {
         yCError(ARV) << "Frame buffer is empty";
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         return false;
+#endif
     }
 
     switch (pixelFormat)
@@ -21,13 +29,21 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelMono> & image)
         break;
     default:
         yCError(ARV) << "Unsupported pixel format";
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         return false;
+#endif
     }
 
     image.resize(_width, _height);
     image.setExternal(framebuffer, _width, _height);
 
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+    return yarp::dev::ReturnValue_ok;
+#else
     return true;
+#endif
 }
 
 int AravisCamera::height() const

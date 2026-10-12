@@ -6,14 +6,22 @@
 
 #include "LogComponent.hpp"
 
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+yarp::dev::ReturnValue AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
+#else
 bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
+#endif
 {
     void * framebuffer = getFrameBuffer();
 
     if (!framebuffer)
     {
         yCError(ARV) << "Frame buffer is empty";
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         return false;
+#endif
     }
 
     cv::Mat sourceImg, rgbImg;
@@ -42,11 +50,19 @@ bool AravisCamera::getImage(yarp::sig::ImageOf<yarp::sig::PixelRgb> & image)
         break;
     default:
         yCError(ARV) << "Unsupported pixel format";
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         return false;
+#endif
     }
 
     image.resize(_width, _height);
     image.setExternal(rgbImg.data, _width, _height);
 
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+    return yarp::dev::ReturnValue_ok;
+#else
     return true;
+#endif
 }

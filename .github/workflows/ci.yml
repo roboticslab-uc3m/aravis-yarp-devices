@@ -41,8 +41,8 @@ jobs:
         - { os: ubuntu-26.04, compiler: { cc: clang-21, cxx: clang++-21 } }
         robotology:
         # CMake 3.22 instead of 3.19 because of the CMAKE_BUILD_TYPE env var
-        - { yarp: yarp-3.11, cmake: 3.22.x }
         - { yarp: yarp-3.12, cmake: 3.22.x }
+        - { yarp: yarp-4.0,  cmake: 3.22.x }
         - { yarp: master,    cmake: 3.22.x }
         experimental:
         - ${{github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'}}
@@ -83,6 +83,11 @@ jobs:
       run: |
         echo "CC=${{matrix.system.compiler.cc}}" >> $GITHUB_ENV
         echo "CXX=${{matrix.system.compiler.cxx}}" >> $GITHUB_ENV
+
+    - name: Set environment variables (YARP next)
+      if: ${{matrix.robotology.yarp == 'master'}}
+      run: |
+        echo "CXXFLAGS=-DYARP_NEXT" >> $GITHUB_ENV
 
     - name: Build YCM
       run: |

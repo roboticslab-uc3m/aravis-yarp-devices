@@ -4,15 +4,27 @@
 
 #include "LogComponent.hpp"
 
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+yarp::dev::ReturnValue AravisCamera::getFeatureLimits(yarp::dev::cameraFeature_id_t feature, double & min, double & max)
+#else
 bool AravisCamera::getFeatureLimits(int feature, double * min, double * max)
+#endif
 {
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+    const auto * info = getFeatureInfo(feature);
+#else
     auto f = static_cast<cameraFeature_id_t>(feature);
-    const FeatureInfo * info = getFeatureInfo(f);
+    const auto * info = getFeatureInfo(f);
+#endif
 
     if (!info || !info->featureName)
     {
-        yCError(ARV) << "Feature" << feature << "not supported";
+        yCError(ARV) << "Feature" << static_cast<int>(feature) << "not supported";
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         return false;
+#endif
     }
 
     ArvDevice * device = arv_camera_get_device(camera);
@@ -20,13 +32,21 @@ bool AravisCamera::getFeatureLimits(int feature, double * min, double * max)
     if (!device)
     {
         yCError(ARV) << "Camera device not available";
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         return false;
+#endif
     }
 
     if (!arv_device_get_feature(device, info->featureName))
     {
         yCWarning(ARV) << "Feature" << info->featureName << "not available on this device";
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         return false;
+#endif
     }
 
     GError * error = nullptr;
@@ -38,9 +58,15 @@ bool AravisCamera::getFeatureLimits(int feature, double * min, double * max)
 
     if (!error && min_int != max_int)
     {
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        min = static_cast<double>(min_int);
+        max = static_cast<double>(max_int);
+        return yarp::dev::ReturnValue_ok;
+#else
         *min = static_cast<double>(min_int);
         *max = static_cast<double>(max_int);
         return true;
+#endif
     }
 
     if (error)
@@ -56,9 +82,15 @@ bool AravisCamera::getFeatureLimits(int feature, double * min, double * max)
 
     if (!error && min_float != max_float)
     {
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        min = static_cast<double>(min_float);
+        max = static_cast<double>(max_float);
+        return yarp::dev::ReturnValue_ok;
+#else
         *min = static_cast<double>(min_float);
         *max = static_cast<double>(max_float);
         return true;
+#endif
     }
 
     if (error)
@@ -69,22 +101,42 @@ bool AravisCamera::getFeatureLimits(int feature, double * min, double * max)
     }
 
     yCWarning(ARV) << "Could not retrieve valid range for feature" << info->featureName;
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+    return yarp::dev::ReturnValue_error_method_failed;
+#else
     return false;
+#endif
 }
 
-bool AravisCamera::checkEnabled(cameraFeature_id_t feature, bool * compatible)
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+yarp::dev::ReturnValue AravisCamera::checkEnabled(yarp::dev::cameraFeature_id_t feature, bool & compatible)
+#else
+bool AravisCamera::checkEnabled(int feature, bool * compatible)
+#endif
 {
+#if YARP_VERSION_COMPARE(<, 4, 0, 0)
     if (!compatible)
     {
         return false;
     }
+#endif
 
-    const FeatureInfo * info = getFeatureInfo(feature);
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+    const auto * info = getFeatureInfo(feature);
+#else
+    auto f = static_cast<cameraFeature_id_t>(feature);
+    const auto * info = getFeatureInfo(f);
+#endif
 
     if (!info)
     {
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        compatible = false;
+        return yarp::dev::ReturnValue_ok;
+#else
         *compatible = false;
         return true;
+#endif
     }
 
     ArvDevice * device = arv_camera_get_device(camera);
@@ -92,22 +144,41 @@ bool AravisCamera::checkEnabled(cameraFeature_id_t feature, bool * compatible)
 
     if (arv_camera_is_feature_available(camera, info->enabledName, &error) == 0 && arv_device_get_feature(device, info->enabledName) != 0)
     {
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        compatible = false;
+        return yarp::dev::ReturnValue_ok;
+#else
         *compatible = false;
         return true;
+#endif
     }
 
     if (error)
     {
         g_error_free(error);
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        compatible = false;
+        return yarp::dev::ReturnValue_error_method_failed;
+#else
         *compatible = false;
         return false;
+#endif
     }
 
-    *compatible = true;
-    return true;
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+        compatible = true;
+        return yarp::dev::ReturnValue_ok;
+#else
+        *compatible = true;
+        return true;
+#endif
 }
 
+#if YARP_VERSION_COMPARE(>=, 4, 0, 0)
+const FeatureInfo * AravisCamera::getFeatureInfo(yarp::dev::cameraFeature_id_t feature)
+#else
 const FeatureInfo * AravisCamera::getFeatureInfo(cameraFeature_id_t feature)
+#endif
 {
     if (yarp_arv_int_feature_map.count(feature))
     {
